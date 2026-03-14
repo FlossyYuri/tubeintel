@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { AppLayout } from "@/components/layout/AppLayout";
+import type { Metadata } from 'next';
+import './globals.css';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 export const metadata: Metadata = {
-  title: "TubeIntel — YouTube Research Platform",
-  description: "Plataforma de pesquisa e inteligência para criadores de conteúdo YouTube",
+  title: 'TubeIntel — YouTube Research Platform',
+  description:
+    'Plataforma de pesquisa e inteligência para criadores de conteúdo YouTube',
 };
 
 export default function RootLayout({
@@ -13,8 +14,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt">
-      <body className="antialiased">
+    <html lang='pt'>
+      <body className=''>
         <AppLayout>{children}</AppLayout>
       </body>
     </html>

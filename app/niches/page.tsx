@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { NICHES } from "@/lib/niches";
+import { PageHeader } from "@/components/ui";
+import { card } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 export default function NichesPage() {
   const [selected, setSelected] = useState<number | null>(null);
@@ -16,26 +19,26 @@ export default function NichesPage() {
 
   return (
     <div>
-      <h2 className="text-[22px] font-extrabold mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
-        🎯 Explorador de Nichos
-      </h2>
-      <p className="text-[13px] text-[var(--text2)] mb-6">
-        Analisa os nichos mais quentes e encontra oportunidades
-      </p>
+      <PageHeader
+        title="🎯 Explorador de Nichos"
+        description="Analisa os nichos mais quentes e encontra oportunidades"
+      />
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
         {NICHES.map((niche, i) => (
           <button
             key={niche.name}
             onClick={() => handleNicheClick(i)}
-            className={`p-4 rounded-xl text-center transition-all border ${
+            className={cn(
+              card,
+              "p-4 rounded-xl text-center transition-all duration-200 border",
               selected === i
                 ? "bg-[rgba(255,61,61,0.08)] border-[var(--accent)]"
-                : "bg-[var(--card)] border-[var(--border)] hover:border-[var(--border2)] hover:-translate-y-0.5"
-            }`}
+                : "hover:border-[var(--border2)] hover:-translate-y-0.5"
+            )}
           >
             <span className="text-2xl block mb-2">{niche.icon}</span>
-            <div className="text-sm font-semibold mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
+            <div className="text-sm font-semibold mb-1 font-display">
               {niche.name}
             </div>
             <div className={`text-[10px] font-mono ${niche.up ? "text-[var(--green)]" : "text-[var(--accent)]"}`}>

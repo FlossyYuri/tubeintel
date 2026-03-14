@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, Plus, Trash2 } from "lucide-react";
+import { Bell, Plus } from "lucide-react";
+import { PageHeader, Spinner, EmptyState } from "@/components/ui";
+import { input, buttonPrimary, card } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface Alert {
   id: string;
@@ -46,18 +49,16 @@ export default function AlertsPage() {
 
   return (
     <div>
-      <h2 className="text-[22px] font-extrabold mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
-        Alertas e Monitoring
-      </h2>
-      <p className="text-[13px] text-[var(--text2)] mb-6">
-        Configura alertas para keywords e canais
-      </p>
+      <PageHeader
+        title="Alertas e Monitoring"
+        description="Configura alertas para keywords e canais"
+      />
 
-      <div className="flex gap-2 mb-6 flex-wrap">
+      <div className="flex flex-col sm:flex-row gap-2 mb-6 flex-wrap">
         <select
           value={type}
           onChange={(e) => setType(e.target.value)}
-          className="bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] px-4 py-2 rounded-lg"
+          className={cn(input, "cursor-pointer")}
         >
           <option value="keyword">Keyword</option>
           <option value="channel">Canal</option>
@@ -68,33 +69,33 @@ export default function AlertsPage() {
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleCreate()}
           placeholder={type === "keyword" ? "Palavra-chave..." : "ID do canal..."}
-          className="bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] px-4 py-2 rounded-lg flex-1 min-w-[200px]"
+          className={cn(input, "flex-1 min-w-0")}
         />
         <button
           onClick={handleCreate}
           disabled={!value.trim()}
-          className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white font-bold rounded-lg hover:bg-[#ff5555] disabled:opacity-50"
+          className={cn(buttonPrimary, "flex items-center gap-2 px-4 py-2")}
         >
           <Plus className="size-4" /> Adicionar
         </button>
       </div>
 
       {loading ? (
-        <div className="text-center py-16">
-          <div className="w-9 h-9 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-4" />
+        <div className="flex flex-col items-center justify-center py-16">
+          <Spinner className="mb-4" />
         </div>
       ) : alerts.length === 0 ? (
-        <div className="text-center py-20 text-[var(--text3)]">
-          <div className="text-5xl mb-4 opacity-30">🔔</div>
-          <p className="font-semibold text-base text-[var(--text2)]">Sem alertas</p>
-          <p className="text-sm">Adiciona um alerta para começar</p>
-        </div>
+        <EmptyState
+          icon="🔔"
+          title="Sem alertas"
+          description="Adiciona um alerta para começar"
+        />
       ) : (
         <div className="space-y-2">
           {alerts.map((a) => (
             <div
               key={a.id}
-              className="flex items-center justify-between p-4 bg-[var(--card)] border border-[var(--border)] rounded-xl"
+              className={cn(card, "flex items-center justify-between p-4")}
             >
               <div className="flex items-center gap-3">
                 <Bell className="size-5 text-[var(--accent)]" />

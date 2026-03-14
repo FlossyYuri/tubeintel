@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import { formatNumber } from "@/lib/format";
+import Image from 'next/image';
+import Link from 'next/link';
+import { formatNumber } from '@/lib/format';
+import { ArrowUpRight } from 'lucide-react';
 
 interface ChannelCardProps {
   channelId: string;
@@ -28,42 +29,81 @@ export function ChannelCard({
   return (
     <Link
       href={`/channels/${channelId}`}
-      className="flex items-center gap-4 p-5 bg-[var(--card)] border border-[var(--border)] rounded-xl transition-all hover:border-[var(--border2)] hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(0,0,0,0.25)]"
+      className='group flex flex-col gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 sm:flex-row sm:items-center sm:p-5 transition-all duration-200 hover:border-white/[0.1] hover:bg-white/[0.04]'
     >
-      <div className="size-14 rounded-full bg-[var(--bg3)] overflow-hidden shrink-0 border-2 border-[var(--border2)]">
-        {thumbnail ? (
-          <Image src={thumbnail} alt="" width={56} height={56} className="object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-[var(--text2)] font-bold text-xl">
-            {initial}
-          </div>
-        )}
+      {/* Avatar */}
+      <div className='relative size-14 shrink-0'>
+        <div className='size-14 overflow-hidden rounded-full border border-white/[0.08] bg-[#111118]'>
+          {thumbnail ? (
+            <Image
+              src={thumbnail}
+              alt=''
+              width={56}
+              height={56}
+              className='h-full w-full object-cover'
+            />
+          ) : (
+            <div
+              className='flex h-full w-full items-center justify-center text-xl font-bold text-[#8A8880]'
+              style={{ fontFamily: "'Syne', sans-serif" }}
+            >
+              {initial}
+            </div>
+          )}
+        </div>
+        {/* Online dot (decorativo) */}
+        <span className='absolute bottom-0.5 right-0.5 size-2.5 rounded-full border-2 border-[#0a0a0f] bg-[#3E3C38]' />
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="font-bold text-[15px] mb-0.5" style={{ fontFamily: "Syne, sans-serif" }}>
+
+      {/* Info */}
+      <div className='flex-1 min-w-0'>
+        <div
+          className='mb-0.5 truncate text-[15px] font-semibold tracking-tight text-[#F0EEE8]'
+          style={{ fontFamily: "'Syne', sans-serif" }}
+        >
           {name}
         </div>
         {description && (
-          <div className="text-[11px] text-[var(--text3)] font-mono mb-2 truncate">
+          <div
+            className='mb-3 truncate text-[11px] text-[#4A4845]'
+            style={{ fontFamily: "'DM Mono', monospace" }}
+          >
             {description}
           </div>
         )}
-        <div className="flex gap-4">
-          <div className="text-center">
-            <div className="font-bold text-sm text-[var(--text)]">{formatNumber(subscriberCount)}</div>
-            <div className="text-[9px] text-[var(--text3)] font-mono uppercase">Subs</div>
-          </div>
-          <div className="text-center">
-            <div className="font-bold text-sm text-[var(--text)]">{formatNumber(videoCount)}</div>
-            <div className="text-[9px] text-[var(--text3)] font-mono uppercase">Vídeos</div>
-          </div>
-          <div className="text-center">
-            <div className="font-bold text-sm text-[var(--text)]">{formatNumber(viewCount)}</div>
-            <div className="text-[9px] text-[var(--text3)] font-mono uppercase">Views</div>
-          </div>
+
+        {/* Stats */}
+        <div className='flex flex-wrap gap-4 sm:gap-5'>
+          {[
+            { value: subscriberCount, label: 'Subs' },
+            { value: videoCount, label: 'Vídeos' },
+            { value: viewCount, label: 'Views' },
+          ].map(({ value, label }) => (
+            <div key={label} className='flex flex-col gap-0.5'>
+              <span className='text-[13px] font-semibold leading-none text-[#F0EEE8]'>
+                {formatNumber(value)}
+              </span>
+              <span
+                className='text-[9px] uppercase tracking-[0.15em] text-[#3E3C38]'
+                style={{ fontFamily: "'DM Mono', monospace" }}
+              >
+                {label}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
-      <span className="text-[10px] font-mono text-[var(--green)]">Ver detalhes →</span>
+
+      {/* CTA */}
+      <div className='flex shrink-0 items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 transition-all duration-200 group-hover:border-[rgba(232,68,28,0.3)] group-hover:bg-[rgba(232,68,28,0.08)]'>
+        <span
+          className='text-[10px] font-medium text-[#4A4845] transition-colors duration-200 group-hover:text-[#FF6B3D]'
+          style={{ fontFamily: "'DM Mono', monospace" }}
+        >
+          Ver detalhes
+        </span>
+        <ArrowUpRight className='size-3 text-[#4A4845] transition-colors duration-200 group-hover:text-[#FF6B3D]' />
+      </div>
     </Link>
   );
 }

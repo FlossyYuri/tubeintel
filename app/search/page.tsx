@@ -7,6 +7,8 @@ import { FilterPanel, type SearchFilters } from "@/components/search/FilterPanel
 import { DateFilter } from "@/components/search/DateFilter";
 import { VideoGrid } from "@/components/video/VideoGrid";
 import { VideoModal } from "@/components/video/VideoModal";
+import { Spinner, EmptyState, ErrorMessage } from "@/components/ui";
+import { sectionTitle } from "@/lib/design-tokens";
 import { mergeSearchWithVideos } from "@/lib/transform";
 import type { VideoWithStats } from "@/types/youtube";
 
@@ -125,10 +127,7 @@ function SearchPageContent() {
         className="bg-gradient-to-br from-[var(--card)] to-[var(--card2)] border border-[var(--border)] rounded-2xl p-8 mb-7 relative overflow-hidden"
       >
         <div className="absolute top-[-60px] right-[-60px] w-[200px] h-[200px] bg-[radial-gradient(circle,rgba(255,61,61,0.1)_0%,transparent_70%)] pointer-events-none" />
-        <h2
-          className="text-[26px] font-extrabold mb-1.5"
-          style={{ fontFamily: "Syne, sans-serif" }}
-        >
+        <h2 className="text-xl sm:text-2xl font-extrabold mb-1.5 font-display">
           Encontra vídeos <span className="text-[var(--accent)]">virais</span>
         </h2>
         <p className="text-[var(--text2)] text-sm mb-5">
@@ -145,34 +144,25 @@ function SearchPageContent() {
       </div>
 
       {error && (
-        <div className="mb-5 p-4 rounded-xl bg-[rgba(255,61,61,0.08)] border border-[rgba(255,61,61,0.3)] flex items-center gap-2.5 text-sm text-[var(--text2)]">
-          ❌ {error}
-        </div>
+        <ErrorMessage message={error} className="mb-5" />
       )}
 
       {loading ? (
-        <div className="text-center py-16 text-[var(--text3)]">
-          <div className="w-9 h-9 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-4" />
+        <div className="flex flex-col items-center justify-center py-16 text-[var(--text3)]">
+          <Spinner className="mb-4" />
           <p className="font-mono text-sm">A pesquisar no YouTube...</p>
         </div>
       ) : videos.length === 0 && !loading ? (
-        <div className="text-center py-20 text-[var(--text3)]">
-          <div className="text-5xl mb-4 opacity-30">🔍</div>
-          <p className="font-semibold text-base text-[var(--text2)] mb-1.5">
-            Pronto para pesquisar
-          </p>
-          <p className="text-sm">
-            Insere um tema e escolhe os filtros para encontrar vídeos virais
-          </p>
-        </div>
+        <EmptyState
+          icon="🔍"
+          title="Pronto para pesquisar"
+          description="Insere um tema e escolhe os filtros para encontrar vídeos virais"
+        />
       ) : (
         <>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
             <div>
-              <h3
-                className="text-[15px] font-bold"
-                style={{ fontFamily: "Syne, sans-serif" }}
-              >
+              <h3 className={sectionTitle}>
                 Resultados para &quot;<span className="text-[var(--blue2)]">{query}</span>&quot;
               </h3>
               <p className="text-[11px] text-[var(--text3)] font-mono">
@@ -194,8 +184,7 @@ function SearchPageContent() {
               <button
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="px-6 py-3 bg-[var(--card2)] border border-[var(--border2)] text-[var(--text)] text-sm font-semibold rounded-lg hover:bg-[var(--border)] transition-colors disabled:opacity-50"
-                style={{ fontFamily: "Syne, sans-serif" }}
+                className="px-6 py-3 bg-[var(--card2)] border border-[var(--border2)] text-[var(--text)] text-sm font-semibold rounded-xl hover:bg-[var(--border)] transition-colors duration-200 disabled:opacity-50 font-display"
               >
                 {loadingMore ? "A carregar..." : "Carregar mais"}
               </button>
@@ -213,7 +202,7 @@ function SearchPageContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="text-center py-16">A carregar...</div>}>
+    <Suspense fallback={<div className="flex flex-col items-center justify-center py-16"><Spinner className="mb-4" /><p className="text-[var(--text3)]">A carregar...</p></div>}>
       <SearchPageContent />
     </Suspense>
   );

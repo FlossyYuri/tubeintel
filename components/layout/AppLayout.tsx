@@ -1,38 +1,45 @@
-"use client";
+'use client';
 
-import { usePathname } from "next/navigation";
-import { Sidebar } from "./Sidebar";
-import { Topbar } from "./Topbar";
+import { useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { Sidebar } from './Sidebar';
+import { Topbar } from './Topbar';
 
 function getPageTitle(pathname: string): string {
-  if (pathname === "/") return "Dashboard";
-  if (pathname.startsWith("/channels/")) return "Detalhe do Canal";
-  if (pathname.startsWith("/saved/")) return "Colecção";
+  if (pathname === '/') return 'Dashboard';
+  if (pathname.startsWith('/channels/')) return 'Detalhe do Canal';
+  if (pathname.startsWith('/saved/')) return 'Colecção';
   const titles: Record<string, string> = {
-    "/search": "Pesquisar Vídeos",
-    "/trending": "Trending",
-    "/niches": "Explorador de Nichos",
-    "/channels": "Analisar Canal",
-    "/compare": "Comparar Canais",
-    "/rising": "Canais em Ascensão",
-    "/shorts": "Shorts Virais",
-    "/saved": "Colecções Guardadas",
-    "/alerts": "Alertas e Monitoring",
-    "/settings": "Configurações",
+    '/search': 'Pesquisar Vídeos',
+    '/trending': 'Trending',
+    '/niches': 'Explorador de Nichos',
+    '/channels': 'Analisar Canal',
+    '/compare': 'Comparar Canais',
+    '/rising': 'Canais em Ascensão',
+    '/shorts': 'Shorts Virais',
+    '/saved': 'Colecções Guardadas',
+    '/alerts': 'Alertas e Monitoring',
+    '/settings': 'Configurações',
   };
-  return titles[pathname] ?? "TubeIntel";
+  return titles[pathname] ?? 'TubeIntel';
 }
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const title = getPageTitle(pathname);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <main className="flex-1 ml-60 min-h-screen">
-        <Topbar title={title} />
-        <div className="p-7">{children}</div>
+    <div className='flex min-h-screen bg-[#07070c]'>
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <main className='flex min-w-0 flex-1 flex-col lg:ml-64 min-h-screen'>
+        <Topbar
+          title={title}
+          onToggleSidebar={() => setSidebarOpen((o) => !o)}
+        />
+        <div className='flex-1 p-4 sm:p-5 lg:p-7 max-w-[var(--content-max)]'>
+          {children}
+        </div>
       </main>
     </div>
   );

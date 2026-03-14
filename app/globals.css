@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   --bg: #080c14;
@@ -20,6 +20,24 @@
   --text2: #8fa3bf;
   --text3: #4a6380;
   --glow: 0 0 30px rgba(255, 61, 61, 0.15);
+
+  /* Tipografia */
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.625rem;
+  --text-display: 1.75rem;
+
+  /* Spacing / Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+
+  /* Container */
+  --content-max: 1400px;
 }
 
 @theme inline {
@@ -44,12 +62,6 @@
   --font-display: 'Syne', sans-serif;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 html {
   color-scheme: dark;
 }
@@ -60,6 +72,23 @@ body {
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+.font-display {
+  font-family: 'Syne', sans-serif;
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.2s ease-out;
 }
 
 ::-webkit-scrollbar {

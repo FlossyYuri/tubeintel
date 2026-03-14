@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ChannelCard } from "@/components/channel/ChannelCard";
 import { RisingBadge } from "@/components/channel/RisingBadge";
+import { PageHeader, Spinner, EmptyState, ErrorMessage } from "@/components/ui";
+import { input, buttonPrimary } from "@/lib/design-tokens";
 
 const REGIONS = [
   { value: "PT", label: "🇵🇹 PT" },
@@ -48,33 +50,31 @@ export default function RisingPage() {
 
   return (
     <div>
-      <h2 className="text-[22px] font-extrabold mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
-        🚀 Canais em Ascensão
-      </h2>
-      <p className="text-[13px] text-[var(--text2)] mb-6">
-        Canais novos ou pequenos com crescimento explosivo
-      </p>
+      <PageHeader
+        title="🚀 Canais em Ascensão"
+        description="Canais novos ou pequenos com crescimento explosivo"
+      />
 
-      <div className="bg-gradient-to-br from-[var(--card)] to-[var(--card2)] border border-[var(--border)] rounded-2xl p-8 mb-7">
-        <div className="flex gap-2.5 flex-wrap">
+      <div className="bg-gradient-to-br from-[var(--card)] to-[var(--card2)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 mb-7">
+        <div className="flex flex-col sm:flex-row gap-2.5 flex-wrap">
           <input
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && setSearchKeyword(keyword)}
             placeholder="Nicho ou keyword..."
-            className="flex-1 min-w-[200px] bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] px-4 py-3 rounded-xl"
+            className={input}
           />
           <button
             onClick={() => setSearchKeyword(keyword)}
-            className="px-6 py-3 bg-[var(--accent)] text-white font-bold rounded-xl hover:bg-[#ff5555]"
+            className={buttonPrimary}
           >
             Buscar
           </button>
           <select
             value={region}
             onChange={(e) => setRegion(e.target.value)}
-            className="bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] px-4 py-3 rounded-xl"
+            className={input}
           >
             {REGIONS.map((r) => (
               <option key={r.value} value={r.value}>{r.label}</option>
@@ -83,22 +83,15 @@ export default function RisingPage() {
         </div>
       </div>
 
-      {error && (
-        <div className="mb-5 p-4 rounded-xl bg-[rgba(255,61,61,0.08)] border border-[rgba(255,61,61,0.3)] text-sm">
-          ❌ {error}
-        </div>
-      )}
+      {error && <ErrorMessage message={error} className="mb-5" />}
 
       {loading ? (
-        <div className="text-center py-16 text-[var(--text3)]">
-          <div className="w-9 h-9 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-4" />
+        <div className="flex flex-col items-center justify-center py-16 text-[var(--text3)]">
+          <Spinner className="mb-4" />
           <p className="font-mono text-sm">A procurar canais em ascensão...</p>
         </div>
       ) : channels.length === 0 ? (
-        <div className="text-center py-20 text-[var(--text3)]">
-          <div className="text-5xl mb-4 opacity-30">🚀</div>
-          <p className="font-semibold text-base text-[var(--text2)]">Sem canais encontrados</p>
-        </div>
+        <EmptyState icon="🚀" title="Sem canais encontrados" />
       ) : (
         <div className="space-y-3">
           {channels.map((ch) => (

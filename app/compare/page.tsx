@@ -12,6 +12,8 @@ import {
   Tooltip,
 } from "recharts";
 import { formatNumber } from "@/lib/format";
+import { PageHeader, Spinner, ErrorMessage } from "@/components/ui";
+import { input, buttonPrimary } from "@/lib/design-tokens";
 
 export default function ComparePage() {
   const [chan1, setChan1] = useState("");
@@ -100,12 +102,10 @@ export default function ComparePage() {
 
   return (
     <div>
-      <h2 className="text-[22px] font-extrabold mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
-        ⚖️ Comparar Canais
-      </h2>
-      <p className="text-[13px] text-[var(--text2)] mb-6">
-        Análise competitiva lado a lado
-      </p>
+      <PageHeader
+        title="⚖️ Comparar Canais"
+        description="Análise competitiva lado a lado"
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center mb-6">
         <input
@@ -113,32 +113,28 @@ export default function ComparePage() {
           value={chan1}
           onChange={(e) => setChan1(e.target.value)}
           placeholder="Canal A (@handle ou nome)"
-          className="bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] px-4 py-3 rounded-xl"
+          className={input}
         />
-        <div className="text-center font-extrabold text-[var(--text3)]">VS</div>
+        <div className="text-center font-extrabold text-[var(--text3)] font-display">VS</div>
         <input
           type="text"
           value={chan2}
           onChange={(e) => setChan2(e.target.value)}
           placeholder="Canal B (@handle ou nome)"
-          className="bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] px-4 py-3 rounded-xl"
+          className={input}
         />
       </div>
       <div className="text-center mb-6">
         <button
           onClick={handleCompare}
           disabled={loading}
-          className="px-6 py-3 bg-[var(--accent)] text-white font-bold rounded-xl hover:bg-[#ff5555] disabled:opacity-50"
+          className={buttonPrimary}
         >
           {loading ? "A comparar..." : "⚡ Comparar Agora"}
         </button>
       </div>
 
-      {error && (
-        <div className="mb-5 p-4 rounded-xl bg-[rgba(255,61,61,0.08)] border border-[rgba(255,61,61,0.3)] text-sm">
-          ❌ {error}
-        </div>
-      )}
+      {error && <ErrorMessage message={error} className="mb-5" />}
 
       {result && (
         <>

@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Folder, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
+import { PageHeader, Spinner, EmptyState } from "@/components/ui";
+import { input, buttonPrimary, card } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface Collection {
   id: string;
@@ -55,47 +58,45 @@ export default function SavedPage() {
 
   return (
     <div>
-      <h2 className="text-[22px] font-extrabold mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
-        Colecções Guardadas
-      </h2>
-      <p className="text-[13px] text-[var(--text2)] mb-6">
-        Organiza os teus vídeos e canais em pastas
-      </p>
+      <PageHeader
+        title="Colecções Guardadas"
+        description="Organiza os teus vídeos e canais em pastas"
+      />
 
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-col sm:flex-row gap-2 mb-6">
         <input
           type="text"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleCreate()}
           placeholder="Nova colecção..."
-          className="bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] px-4 py-2 rounded-lg flex-1 max-w-xs"
+          className={cn(input, "flex-1 max-w-xs")}
         />
         <button
           onClick={handleCreate}
           disabled={creating || !newName.trim()}
-          className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white font-bold rounded-lg hover:bg-[#ff5555] disabled:opacity-50"
+          className={cn(buttonPrimary, "flex items-center gap-2 px-4 py-2")}
         >
           <Plus className="size-4" /> Criar
         </button>
       </div>
 
       {loading ? (
-        <div className="text-center py-16 text-[var(--text3)]">
-          <div className="w-9 h-9 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-4" />
+        <div className="flex flex-col items-center justify-center py-16 text-[var(--text3)]">
+          <Spinner className="mb-4" />
         </div>
       ) : collections.length === 0 ? (
-        <div className="text-center py-20 text-[var(--text3)]">
-          <div className="text-5xl mb-4 opacity-30">📁</div>
-          <p className="font-semibold text-base text-[var(--text2)]">Sem colecções</p>
-          <p className="text-sm">Cria uma colecção para guardar vídeos</p>
-        </div>
+        <EmptyState
+          icon="📁"
+          title="Sem colecções"
+          description="Cria uma colecção para guardar vídeos"
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {collections.map((c) => (
             <div
               key={c.id}
-              className="flex items-center justify-between p-4 bg-[var(--card)] border border-[var(--border)] rounded-xl hover:border-[var(--border2)]"
+              className={cn(card, "flex items-center justify-between p-4 hover:border-[var(--border2)] transition-colors duration-200")}
             >
               <Link href={`/saved/${c.id}`} className="flex items-center gap-3 flex-1 min-w-0">
                 <span className="text-2xl">{c.icon}</span>

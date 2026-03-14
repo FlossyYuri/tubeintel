@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { VideoGrid } from "@/components/video/VideoGrid";
 import { VideoModal } from "@/components/video/VideoModal";
+import { Spinner, EmptyState, ErrorMessage } from "@/components/ui";
+import { PageHeader } from "@/components/ui";
+import { sectionTitle } from "@/lib/design-tokens";
 import { calcViralScore } from "@/lib/viral-score";
 import { parseDuration, isShort } from "@/lib/format";
 import type { VideoWithStats } from "@/types/youtube";
@@ -88,12 +91,10 @@ export default function TrendingPage() {
 
   return (
     <div>
-      <h2 className="text-[22px] font-extrabold mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
-        🔥 Trending Agora
-      </h2>
-      <p className="text-[13px] text-[var(--text2)] mb-6">
-        Vídeos em alta por país — actualizado em tempo real
-      </p>
+      <PageHeader
+        title="🔥 Trending Agora"
+        description="Vídeos em alta por país — actualizado em tempo real"
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 mb-5">
         {COUNTRIES.map((c) => (
@@ -144,26 +145,22 @@ export default function TrendingPage() {
         </button>
       </div>
 
-      {error && (
-        <div className="mb-5 p-4 rounded-xl bg-[rgba(255,61,61,0.08)] border border-[rgba(255,61,61,0.3)] text-sm text-[var(--text2)]">
-          ❌ {error}
-        </div>
-      )}
+      {error && <ErrorMessage message={error} className="mb-5" />}
 
       {loading ? (
-        <div className="text-center py-16 text-[var(--text3)]">
-          <div className="w-9 h-9 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-4" />
+        <div className="flex flex-col items-center justify-center py-16 text-[var(--text3)]">
+          <Spinner className="mb-4" />
           <p className="font-mono text-sm">A carregar trending...</p>
         </div>
       ) : filteredVideos.length === 0 ? (
-        <div className="text-center py-20 text-[var(--text3)]">
-          <div className="text-5xl mb-4 opacity-30">📭</div>
-          <p className="font-semibold text-base text-[var(--text2)]">Sem trending disponível</p>
-        </div>
+        <EmptyState
+          icon="📭"
+          title="Sem trending disponível"
+        />
       ) : (
         <>
           <div className="mb-4">
-            <div className="text-[15px] font-bold" style={{ fontFamily: "Syne, sans-serif" }}>
+            <div className={sectionTitle}>
               Trending em {country}
             </div>
             <div className="text-[11px] text-[var(--text3)] font-mono">

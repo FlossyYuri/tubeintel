@@ -8,6 +8,8 @@ import { ChannelGrowthChart } from "@/components/channel/ChannelGrowthChart";
 import { RisingBadge } from "@/components/channel/RisingBadge";
 import { VideoGrid } from "@/components/video/VideoGrid";
 import { VideoModal } from "@/components/video/VideoModal";
+import { Spinner, ErrorMessage } from "@/components/ui";
+import { sectionTitle } from "@/lib/design-tokens";
 import { mergeSearchWithVideos } from "@/lib/transform";
 import { calcRisingScore } from "@/lib/rising-detector";
 import type { VideoWithStats } from "@/types/youtube";
@@ -92,8 +94,8 @@ export default function ChannelDetailPage() {
 
   if (loading) {
     return (
-      <div className="text-center py-16 text-[var(--text3)]">
-        <div className="w-9 h-9 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-4" />
+      <div className="flex flex-col items-center justify-center py-16 text-[var(--text3)]">
+        <Spinner className="mb-4" />
         <p className="font-mono text-sm">A carregar canal...</p>
       </div>
     );
@@ -108,9 +110,7 @@ export default function ChannelDetailPage() {
         >
           <ArrowLeft className="size-4" /> Voltar
         </button>
-        <div className="p-4 rounded-xl bg-[rgba(255,61,61,0.08)] border border-[rgba(255,61,61,0.3)] text-sm">
-          ❌ {error || "Canal não encontrado"}
-        </div>
+        <ErrorMessage message={error || "Canal não encontrado"} />
       </div>
     );
   }
@@ -131,7 +131,7 @@ export default function ChannelDetailPage() {
           )}
         </div>
         <div>
-          <h2 className="text-xl font-extrabold flex items-center gap-2" style={{ fontFamily: "Syne, sans-serif" }}>
+          <h2 className="text-xl font-extrabold flex items-center gap-2 font-display">
             {channel.name}
             <RisingBadge score={risingScore} />
           </h2>
@@ -153,7 +153,7 @@ export default function ChannelDetailPage() {
       )}
 
       <div className="mb-4">
-        <h3 className="text-[15px] font-bold" style={{ fontFamily: "Syne, sans-serif" }}>
+        <h3 className={sectionTitle}>
           📹 Vídeos mais recentes
         </h3>
       </div>

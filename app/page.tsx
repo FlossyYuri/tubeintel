@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Search, Flame, Tv, Bookmark, Bell } from "lucide-react";
+import { Search, Flame, Tv, Bookmark } from "lucide-react";
+import { PageHeader } from "@/components/ui";
+import { card } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 export default function HomePage() {
   const [stats, setStats] = useState({
@@ -19,27 +22,25 @@ export default function HomePage() {
 
   return (
     <div>
-      <h2 className="text-[22px] font-extrabold mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
-        Dashboard
-      </h2>
-      <p className="text-[13px] text-[var(--text2)] mb-6">
-        Bem-vindo ao TubeIntel. Configura a tua API Key em Configurações para começar.
-      </p>
+      <PageHeader
+        title="Dashboard"
+        description="Bem-vindo ao TubeIntel. Configura a tua API Key em Configurações para começar."
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
+        <div className={cn(card, "p-5")}>
           <div className="text-[10px] uppercase tracking-widest text-[var(--text3)] mb-2 font-mono">
             Colecções
           </div>
-          <div className="text-[28px] font-extrabold text-[var(--accent)]" style={{ fontFamily: "Syne, sans-serif" }}>
+          <div className="text-[28px] font-extrabold text-[var(--accent)] font-display">
             {stats.collections}
           </div>
         </div>
-        <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
+        <div className={cn(card, "p-5")}>
           <div className="text-[10px] uppercase tracking-widest text-[var(--text3)] mb-2 font-mono">
             Alertas
           </div>
-          <div className="text-[28px] font-extrabold text-[var(--blue)]" style={{ fontFamily: "Syne, sans-serif" }}>
+          <div className="text-[28px] font-extrabold text-[var(--blue)] font-display">
             {stats.alerts}
           </div>
         </div>
@@ -48,7 +49,7 @@ export default function HomePage() {
       <div className="grid gap-4 sm:grid-cols-2">
         <Link
           href="/search"
-          className="flex items-center gap-4 p-5 bg-[var(--card)] border border-[var(--border)] rounded-xl hover:border-[var(--border2)] transition-colors"
+          className={cn(card, "flex items-center gap-4 p-5 hover:border-[var(--border2)] transition-colors duration-200")}
         >
           <Search className="size-8 text-[var(--accent)]" />
           <div>
@@ -58,7 +59,7 @@ export default function HomePage() {
         </Link>
         <Link
           href="/trending"
-          className="flex items-center gap-4 p-5 bg-[var(--card)] border border-[var(--border)] rounded-xl hover:border-[var(--border2)] transition-colors"
+          className={cn(card, "flex items-center gap-4 p-5 hover:border-[var(--border2)] transition-colors duration-200")}
         >
           <Flame className="size-8 text-[var(--accent)]" />
           <div>
@@ -68,7 +69,7 @@ export default function HomePage() {
         </Link>
         <Link
           href="/channels"
-          className="flex items-center gap-4 p-5 bg-[var(--card)] border border-[var(--border)] rounded-xl hover:border-[var(--border2)] transition-colors"
+          className={cn(card, "flex items-center gap-4 p-5 hover:border-[var(--border2)] transition-colors duration-200")}
         >
           <Tv className="size-8 text-[var(--blue)]" />
           <div>
@@ -78,7 +79,7 @@ export default function HomePage() {
         </Link>
         <Link
           href="/saved"
-          className="flex items-center gap-4 p-5 bg-[var(--card)] border border-[var(--border)] rounded-xl hover:border-[var(--border2)] transition-colors"
+          className={cn(card, "flex items-center gap-4 p-5 hover:border-[var(--border2)] transition-colors duration-200")}
         >
           <Bookmark className="size-8 text-[var(--green)]" />
           <div>

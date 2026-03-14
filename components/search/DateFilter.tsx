@@ -24,7 +24,7 @@ export function DateFilter({ value, onChange }: DateFilterProps) {
           type="button"
           onClick={() => onChange(opt.value)}
           className={cn(
-            "px-3 py-1.5 rounded-full text-[11.5px] cursor-pointer border transition-all font-mono",
+            "px-3 py-1.5 rounded-full text-[11.5px] cursor-pointer border transition-all duration-200 font-mono focus-visible:ring-2 focus-visible:ring-[var(--blue)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]",
             value === opt.value
               ? "bg-[rgba(61,139,255,0.15)] border-[var(--blue)] text-[var(--blue2)]"
               : "border-[var(--border)] text-[var(--text2)] bg-[var(--bg)] hover:border-[var(--blue)] hover:text-[var(--blue)]"

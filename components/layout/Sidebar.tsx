@@ -1,125 +1,294 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   Search,
   Flame,
   Target,
   Tv,
-  Scale,
-  Zap,
+  ArrowLeftRight,
   TrendingUp,
+  Zap,
   Bookmark,
   Bell,
   Settings,
-} from "lucide-react";
+  X,
+  BarChart2,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const navSections = [
   {
-    title: "Pesquisa",
+    title: 'Pesquisa',
     items: [
-      { href: "/search", label: "Pesquisar Vídeos", icon: Search },
-      { href: "/trending", label: "Trending", icon: Flame },
-      { href: "/niches", label: "Nichos", icon: Target },
+      { href: '/search', label: 'Pesquisar Vídeos', icon: Search },
+      { href: '/trending', label: 'Trending', icon: Flame, isLive: true },
+      { href: '/niches', label: 'Nichos', icon: Target },
     ],
   },
   {
-    title: "Canais",
+    title: 'Canais',
     items: [
-      { href: "/channels", label: "Analisar Canal", icon: Tv },
-      { href: "/compare", label: "Comparar Canais", icon: Scale },
-      { href: "/rising", label: "Canais em Ascensão", icon: TrendingUp },
+      { href: '/channels', label: 'Analisar Canal', icon: Tv },
+      { href: '/compare', label: 'Comparar Canais', icon: ArrowLeftRight },
+      { href: '/rising', label: 'Canais em Ascensão', icon: TrendingUp },
     ],
   },
   {
-    title: "Formatos",
-    items: [
-      { href: "/shorts", label: "Shorts Virais", icon: Zap },
-    ],
+    title: 'Formatos',
+    items: [{ href: '/shorts', label: 'Shorts Virais', icon: Zap }],
   },
   {
-    title: "Organização",
+    title: 'Organização',
     items: [
-      { href: "/saved", label: "Colecções", icon: Bookmark },
-      { href: "/alerts", label: "Alertas", icon: Bell },
+      { href: '/saved', label: 'Colecções', icon: Bookmark },
+      { href: '/alerts', label: 'Alertas', icon: Bell },
     ],
   },
 ];
 
-export function Sidebar() {
+function SidebarContent({
+  onNavigate,
+  onClose,
+}: {
+  onNavigate?: () => void;
+  onClose?: () => void;
+}) {
   const pathname = usePathname();
 
   return (
-    <aside
-      className="w-60 min-h-screen bg-[var(--bg2)] border-r border-[var(--border)] flex flex-col fixed top-0 left-0 z-[100]"
-    >
-      <div className="p-6 pb-5 border-b border-[var(--border)]">
-        <Link href="/" className="block">
-          <div
-            className="text-xl font-extrabold tracking-tight"
-            style={{ fontFamily: "Syne, sans-serif" }}
-          >
-            Tube<span className="text-[var(--accent)]">Intel</span>
+    <>
+      {/* Ambient glow top */}
+      <div className='pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(ellipse_at_30%_0%,rgba(232,68,28,0.08)_0%,transparent_65%)]' />
+
+      {/* Header / Brand */}
+      <div className='relative border-b border-white/[0.06] px-5 py-[22px]'>
+        <Link href='/' onClick={onNavigate} className='flex items-center gap-3'>
+          {/* Icon */}
+          <div className='flex size-[38px] shrink-0 items-center justify-center rounded-[10px] bg-[#E8441C] shadow-[0_4px_16px_rgba(232,68,28,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]'>
+            <BarChart2 className='size-[18px] text-white' strokeWidth={2.5} />
           </div>
-          <div
-            className="text-[10px] text-[var(--text3)] uppercase tracking-[0.2em] mt-0.5"
-            style={{ fontFamily: "Space Mono, monospace" }}
-          >
-            Research Platform
+
+          {/* Wordmark */}
+          <div className='flex flex-col gap-px'>
+            <span
+              className='text-[17px] font-extrabold leading-none tracking-tight text-[#F0EEE8]'
+              style={{ fontFamily: "'Syne', sans-serif" }}
+            >
+              Tube<span className='text-[#E8441C]'>Intel</span>
+            </span>
+            <span
+              className='mt-[3px] text-[9px] uppercase tracking-[0.14em] text-[#4A4845]'
+              style={{ fontFamily: "'DM Mono', monospace" }}
+            >
+              Research Platform
+            </span>
           </div>
         </Link>
+
+        {onClose && (
+          <button
+            onClick={onClose}
+            className='absolute right-4 top-5 rounded-lg p-2 text-[#4A4845] transition-all duration-200 hover:bg-white/5 hover:text-[#F0EEE8] focus-visible:ring-2 focus-visible:ring-[#E8441C]'
+            aria-label='Fechar menu'
+          >
+            <X className='size-5' />
+          </button>
+        )}
       </div>
 
-      <nav className="py-4 flex-1 overflow-y-auto">
+      {/* Navigation */}
+      <nav className='flex flex-1 flex-col gap-5 overflow-y-auto px-3 py-4 scrollbar-none'>
         {navSections.map((section) => (
-          <div key={section.title} className="mb-4">
-            <div
-              className="px-5 py-2 text-[9px] uppercase tracking-[0.2em] text-[var(--text3)]"
-              style={{ fontFamily: "Space Mono, monospace" }}
+          <div key={section.title}>
+            {/* Section label */}
+            <p
+              className='mb-1.5 px-2.5 text-[9px] uppercase tracking-[0.18em] text-[#3E3C38]'
+              style={{ fontFamily: "'DM Mono', monospace" }}
             >
               {section.title}
-            </div>
-            {section.items.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] text-[var(--text2)] border-l-2 border-transparent transition-all hover:bg-[var(--card)] hover:text-[var(--text)] ${
-                    isActive
-                      ? "bg-[rgba(255,61,61,0.08)] text-[var(--accent)] border-l-[var(--accent)]"
-                      : ""
-                  }`}
-                >
-                  <Icon className="size-5 shrink-0" />
-                  <span>{item.label}</span>
-                  {item.href === "/trending" && (
-                    <span className="ml-auto bg-[var(--accent)] text-white text-[9px] px-1.5 py-0.5 rounded-full font-mono">
-                      LIVE
+            </p>
+
+            {/* Items */}
+            <div className='flex flex-col gap-px'>
+              {section.items.map((item) => {
+                const isActive =
+                  pathname === item.href ||
+                  pathname.startsWith(item.href + '/');
+                const Icon = item.icon;
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onNavigate}
+                    className={cn(
+                      'group relative flex items-center gap-2.5 rounded-[10px] border px-2.5 py-[9px] transition-all duration-[180ms]',
+                      isActive
+                        ? 'border-[rgba(232,68,28,0.3)] bg-[rgba(232,68,28,0.12)]'
+                        : 'border-transparent hover:border-white/[0.06] hover:bg-white/[0.04]',
+                    )}
+                  >
+                    {/* Active left bar */}
+                    {isActive && (
+                      <span className='absolute left-0 top-1/2 h-[18px] w-[3px] -translate-y-1/2 rounded-r-[3px] bg-[#E8441C]' />
+                    )}
+
+                    {/* Icon container */}
+                    <div
+                      className={cn(
+                        'flex size-8 shrink-0 items-center justify-center rounded-lg transition-all duration-[180ms]',
+                        isActive
+                          ? 'bg-[rgba(232,68,28,0.15)]'
+                          : 'bg-white/[0.04] group-hover:bg-white/[0.06]',
+                      )}
+                    >
+                      <Icon
+                        className={cn(
+                          'size-3.5 shrink-0 transition-colors duration-[180ms]',
+                          isActive
+                            ? 'text-[#FF6B3D]'
+                            : 'text-[#4A4845] group-hover:text-[#8A8880]',
+                        )}
+                        strokeWidth={2}
+                      />
+                    </div>
+
+                    {/* Label */}
+                    <span
+                      className={cn(
+                        'flex-1 truncate text-[13px] font-medium tracking-[-0.01em] transition-colors duration-[180ms]',
+                        isActive
+                          ? 'text-[#F0EEE8]'
+                          : 'text-[#8A8880] group-hover:text-[#F0EEE8]',
+                      )}
+                    >
+                      {item.label}
                     </span>
-                  )}
-                </Link>
-              );
-            })}
+
+                    {/* Live badge */}
+                    {item.isLive && (
+                      <span
+                        className='shrink-0 animate-pulse rounded px-1.5 py-0.5 text-[8px] font-medium uppercase tracking-[0.1em] text-white'
+                        style={{
+                          fontFamily: "'DM Mono', monospace",
+                          background: '#E8441C',
+                          animationDuration: '2s',
+                        }}
+                      >
+                        Live
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         ))}
       </nav>
 
-      <div className="p-4 border-t border-[var(--border)] bg-[var(--bg)]">
+      {/* Settings footer */}
+      <div className='border-t border-white/[0.06] p-3'>
         <Link
-          href="/settings"
-          className={`flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] text-[var(--text2)] border-l-2 border-transparent transition-all hover:bg-[var(--card)] hover:text-[var(--text)] ${
-            pathname === "/settings"
-              ? "bg-[rgba(255,61,61,0.08)] text-[var(--accent)] border-l-[var(--accent)]"
-              : ""
-          }`}
+          href='/settings'
+          onClick={onNavigate}
+          className={cn(
+            'group relative flex items-center gap-2.5 rounded-[10px] border px-2.5 py-[9px] transition-all duration-[180ms]',
+            pathname === '/settings'
+              ? 'border-[rgba(232,68,28,0.3)] bg-[rgba(232,68,28,0.12)]'
+              : 'border-transparent hover:border-white/[0.06] hover:bg-white/[0.04]',
+          )}
         >
-          <Settings className="size-5 shrink-0" />
-          <span>Configurações</span>
+          {pathname === '/settings' && (
+            <span className='absolute left-0 top-1/2 h-[18px] w-[3px] -translate-y-1/2 rounded-r-[3px] bg-[#E8441C]' />
+          )}
+
+          <div
+            className={cn(
+              'flex size-8 shrink-0 items-center justify-center rounded-lg transition-all duration-[180ms]',
+              pathname === '/settings'
+                ? 'bg-[rgba(232,68,28,0.15)]'
+                : 'bg-white/[0.04] group-hover:bg-white/[0.06]',
+            )}
+          >
+            <Settings
+              className={cn(
+                'size-3.5 shrink-0 transition-colors duration-[180ms]',
+                pathname === '/settings'
+                  ? 'text-[#FF6B3D]'
+                  : 'text-[#4A4845] group-hover:text-[#8A8880]',
+              )}
+              strokeWidth={2}
+            />
+          </div>
+
+          <span
+            className={cn(
+              'flex-1 truncate text-[13px] font-medium tracking-[-0.01em] transition-colors duration-[180ms]',
+              pathname === '/settings'
+                ? 'text-[#F0EEE8]'
+                : 'text-[#8A8880] group-hover:text-[#F0EEE8]',
+            )}
+          >
+            Configurações
+          </span>
         </Link>
       </div>
-    </aside>
+    </>
+  );
+}
+
+interface SidebarProps {
+  open?: boolean;
+  onClose?: () => void;
+}
+
+export function Sidebar({ open = false, onClose }: SidebarProps) {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (open && onClose) {
+      onClose();
+    }
+  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const sidebarClasses =
+    'relative w-64 min-h-screen flex flex-col overflow-hidden bg-[#0a0a0f] border-r border-white/[0.06] fixed top-0 left-0 z-[100]';
+
+  return (
+    <>
+      {/* Desktop */}
+      <aside className={cn('hidden lg:flex', sidebarClasses)}>
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile drawer */}
+      {open && (
+        <div
+          className='fixed inset-0 z-[200] lg:hidden'
+          aria-modal='true'
+          role='dialog'
+          aria-label='Menu de navegação'
+        >
+          <button
+            onClick={onClose}
+            className='absolute inset-0 bg-black/80 backdrop-blur-sm'
+            aria-label='Fechar menu'
+          />
+          <aside
+            className={cn(
+              'absolute left-0 top-0 flex h-full w-72 max-w-[90vw] flex-col',
+              'bg-[#0a0a0f] border-r border-white/[0.06]',
+              'shadow-[4px_0_32px_rgba(0,0,0,0.6)]',
+              'animate-slide-in-left',
+            )}
+          >
+            <SidebarContent onNavigate={onClose} onClose={onClose} />
+          </aside>
+        </div>
+      )}
+    </>
   );
 }

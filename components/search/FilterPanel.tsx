@@ -1,5 +1,8 @@
 "use client";
 
+import { input } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
+
 export interface SearchFilters {
   order: string;
   regionCode: string;
@@ -28,6 +31,11 @@ const FORMATS = [
   { value: "short", label: "Shorts" },
 ];
 
+const selectClasses = cn(
+  input,
+  "cursor-pointer w-full sm:min-w-[130px] sm:w-auto"
+);
+
 interface FilterPanelProps {
   filters: SearchFilters;
   onChange: (filters: SearchFilters) => void;
@@ -35,11 +43,11 @@ interface FilterPanelProps {
 
 export function FilterPanel({ filters, onChange }: FilterPanelProps) {
   return (
-    <div className="flex gap-2.5 flex-wrap">
+    <div className="flex gap-2.5 flex-wrap w-full sm:w-auto">
       <select
         value={filters.order}
         onChange={(e) => onChange({ ...filters, order: e.target.value })}
-        className="bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] px-3.5 py-3 text-sm rounded-xl outline-none cursor-pointer min-w-[130px]"
+        className={selectClasses}
       >
         {ORDERS.map((o) => (
           <option key={o.value} value={o.value}>
@@ -50,7 +58,7 @@ export function FilterPanel({ filters, onChange }: FilterPanelProps) {
       <select
         value={filters.regionCode}
         onChange={(e) => onChange({ ...filters, regionCode: e.target.value })}
-        className="bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] px-3.5 py-3 text-sm rounded-xl outline-none cursor-pointer min-w-[130px]"
+        className={selectClasses}
       >
         {REGIONS.map((r) => (
           <option key={r.value} value={r.value}>
@@ -60,8 +68,10 @@ export function FilterPanel({ filters, onChange }: FilterPanelProps) {
       </select>
       <select
         value={filters.videoDuration}
-        onChange={(e) => onChange({ ...filters, videoDuration: e.target.value })}
-        className="bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] px-3.5 py-3 text-sm rounded-xl outline-none cursor-pointer min-w-[130px]"
+        onChange={(e) =>
+          onChange({ ...filters, videoDuration: e.target.value })
+        }
+        className={selectClasses}
       >
         {FORMATS.map((f) => (
           <option key={f.value || "all"} value={f.value}>

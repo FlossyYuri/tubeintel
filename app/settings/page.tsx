@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Key, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/ui";
+import { input, buttonPrimary, card } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
   const [apiKey, setApiKey] = useState("");
@@ -68,17 +71,13 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <h2 className="text-[22px] font-extrabold mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
-        Configurações
-      </h2>
-      <p className="text-[13px] text-[var(--text2)] mb-6">
-        Configura a tua YouTube Data API v3 Key para usar a plataforma
-      </p>
+      <PageHeader
+        title="Configurações"
+        description="Configura a tua YouTube Data API v3 Key para usar a plataforma"
+      />
 
       <div className="max-w-xl">
-        <div
-          className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6"
-        >
+        <div className={cn(card, "p-6")}>
           <label
             className="block text-[9px] uppercase tracking-[0.2em] text-[var(--text3)] mb-2"
             style={{ fontFamily: "Space Mono, monospace" }}
@@ -94,8 +93,7 @@ export default function SettingsPage() {
                 setStatus("idle");
               }}
               placeholder="AIza..."
-              className="w-full bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] px-3 py-2 text-sm rounded-md font-mono outline-none focus:border-[var(--accent)] transition-colors"
-              style={{ fontFamily: "Space Mono, monospace" }}
+              className={cn(input, "w-full font-mono")}
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
               {status === "loading" && <Loader2 className="size-4 animate-spin text-[var(--text3)]" />}
@@ -109,8 +107,7 @@ export default function SettingsPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="mt-3 w-full py-2 bg-[var(--accent)] text-white text-sm font-bold rounded-md hover:bg-[#ff5555] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ fontFamily: "Syne, sans-serif" }}
+            className={cn(buttonPrimary, "mt-3 w-full py-2")}
           >
             {saving ? "A validar..." : "Guardar Key"}
           </button>
@@ -126,7 +123,7 @@ export default function SettingsPage() {
           )}
         </div>
 
-        <div className="mt-6 p-4 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+        <div className={cn(card, "mt-6 p-4")}>
           <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
             <Key className="size-4" />
             Como obter a API Key

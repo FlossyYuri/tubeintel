@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { SearchBar } from "@/components/search/SearchBar";
 import { ChannelCard } from "@/components/channel/ChannelCard";
+import { PageHeader, Spinner, EmptyState, ErrorMessage } from "@/components/ui";
+import { sectionTitle } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface ChannelResult {
   channelId: string;
@@ -74,12 +77,10 @@ export default function ChannelsPage() {
 
   return (
     <div>
-      <h2 className="text-[22px] font-extrabold mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
-        📺 Analisar Canal
-      </h2>
-      <p className="text-[13px] text-[var(--text2)] mb-6">
-        Métricas detalhadas, vídeos recentes e análise de crescimento
-      </p>
+      <PageHeader
+        title="📺 Analisar Canal"
+        description="Métricas detalhadas, vídeos recentes e análise de crescimento"
+      />
 
       <div className="bg-gradient-to-br from-[var(--card)] to-[var(--card2)] border border-[var(--border)] rounded-2xl p-8 mb-7">
         <div className="flex gap-2.5 flex-wrap">
@@ -91,25 +92,18 @@ export default function ChannelsPage() {
         </div>
       </div>
 
-      {error && (
-        <div className="mb-5 p-4 rounded-xl bg-[rgba(255,61,61,0.08)] border border-[rgba(255,61,61,0.3)] text-sm text-[var(--text2)]">
-          ❌ {error}
-        </div>
-      )}
+      {error && <ErrorMessage message={error} className="mb-5" />}
 
       {loading ? (
-        <div className="text-center py-16 text-[var(--text3)]">
-          <div className="w-9 h-9 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-4" />
+        <div className="flex flex-col items-center justify-center py-16 text-[var(--text3)]">
+          <Spinner className="mb-4" />
           <p className="font-mono text-sm">A procurar canal...</p>
         </div>
       ) : channels.length === 0 && !loading ? (
-        <div className="text-center py-20 text-[var(--text3)]">
-          <div className="text-5xl mb-4 opacity-30">📭</div>
-          <p className="font-semibold text-base text-[var(--text2)]">Canal não encontrado</p>
-        </div>
+        <EmptyState icon="📭" title="Canal não encontrado" />
       ) : (
         <div className="space-y-3">
-          <div className="text-[15px] font-bold mb-4" style={{ fontFamily: "Syne, sans-serif" }}>
+          <div className={cn(sectionTitle, "mb-4")}>
             Canais encontrados
           </div>
           {channels.map((ch) => (
