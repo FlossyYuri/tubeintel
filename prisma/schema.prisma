@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Guarda a API Key e configurações globais
+model Settings {
+  id        Int      @id @default(1)
+  apiKey    String   @default("")
+  updatedAt DateTime @updatedAt
+}
+
+// Pastas de organização de vídeos
+model Collection {
+  id        String       @id @default(cuid())
+  name      String
+  icon      String       @default("📁")
+  color     String       @default("#3D8BFF")
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  items     SavedVideo[]
+}
+
+// Vídeos guardados pelo utilizador
+model SavedVideo {
+  id           String     @id @default(cuid())
+  videoId      String
+  title        String
+  channelTitle String
+  thumbnail    String
+  views        Int        @default(0)
+  viralScore   Int        @default(0)
+  notes        String     @default("")
+  tags         String     @default("") // separados por vírgula
+  savedAt      DateTime   @default(now())
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  collectionId String
+}
+
+// Canais em monitoring activo
+model MonitoredChannel {
+  id          String   @id @default(cuid())
+  channelId   String   @unique
+  channelName String
+  thumbnail   String
+  lastChecked DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
+// Alertas configurados pelo utilizador
+model Alert {
+  id        String   @id @default(cuid())
+  type      String   // "keyword" | "channel" | "trending" | "rising"
+  value     String   // a keyword ou o channelId a monitorar
+  threshold Int      @default(0) // viral score mínimo para disparar
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+// Histórico de pesquisas
+model SearchHistory {
+  id        String   @id @default(cuid())
+  query     String
+  filters   String   // JSON string com todos os filtros usados
+  results   Int      @default(0)
+  createdAt DateTime @default(now())
+}

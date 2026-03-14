@@ -1,65 +1,92 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Search, Flame, Tv, Bookmark, Bell } from "lucide-react";
+
+export default function HomePage() {
+  const [stats, setStats] = useState({
+    collections: 0,
+    alerts: 0,
+  });
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/collections").then((r) => r.json()).then((d) => Array.isArray(d) ? d.length : 0),
+      fetch("/api/alerts").then((r) => r.json()).then((d) => Array.isArray(d) ? d.length : 0),
+    ]).then(([collections, alerts]) => setStats({ collections, alerts }));
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div>
+      <h2 className="text-[22px] font-extrabold mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
+        Dashboard
+      </h2>
+      <p className="text-[13px] text-[var(--text2)] mb-6">
+        Bem-vindo ao TubeIntel. Configura a tua API Key em Configurações para começar.
+      </p>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
+          <div className="text-[10px] uppercase tracking-widest text-[var(--text3)] mb-2 font-mono">
+            Colecções
+          </div>
+          <div className="text-[28px] font-extrabold text-[var(--accent)]" style={{ fontFamily: "Syne, sans-serif" }}>
+            {stats.collections}
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
+          <div className="text-[10px] uppercase tracking-widest text-[var(--text3)] mb-2 font-mono">
+            Alertas
+          </div>
+          <div className="text-[28px] font-extrabold text-[var(--blue)]" style={{ fontFamily: "Syne, sans-serif" }}>
+            {stats.alerts}
+          </div>
         </div>
-      </main>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Link
+          href="/search"
+          className="flex items-center gap-4 p-5 bg-[var(--card)] border border-[var(--border)] rounded-xl hover:border-[var(--border2)] transition-colors"
+        >
+          <Search className="size-8 text-[var(--accent)]" />
+          <div>
+            <div className="font-bold">Pesquisar Vídeos</div>
+            <div className="text-sm text-[var(--text3)]">Encontra vídeos virais por keyword</div>
+          </div>
+        </Link>
+        <Link
+          href="/trending"
+          className="flex items-center gap-4 p-5 bg-[var(--card)] border border-[var(--border)] rounded-xl hover:border-[var(--border2)] transition-colors"
+        >
+          <Flame className="size-8 text-[var(--accent)]" />
+          <div>
+            <div className="font-bold">Trending</div>
+            <div className="text-sm text-[var(--text3)]">Vídeos em alta por país</div>
+          </div>
+        </Link>
+        <Link
+          href="/channels"
+          className="flex items-center gap-4 p-5 bg-[var(--card)] border border-[var(--border)] rounded-xl hover:border-[var(--border2)] transition-colors"
+        >
+          <Tv className="size-8 text-[var(--blue)]" />
+          <div>
+            <div className="font-bold">Analisar Canal</div>
+            <div className="text-sm text-[var(--text3)]">Métricas detalhadas</div>
+          </div>
+        </Link>
+        <Link
+          href="/saved"
+          className="flex items-center gap-4 p-5 bg-[var(--card)] border border-[var(--border)] rounded-xl hover:border-[var(--border2)] transition-colors"
+        >
+          <Bookmark className="size-8 text-[var(--green)]" />
+          <div>
+            <div className="font-bold">Colecções</div>
+            <div className="text-sm text-[var(--text3)]">Vídeos guardados</div>
+          </div>
+        </Link>
+      </div>
     </div>
   );
 }
