@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { X, Bookmark } from "lucide-react";
-import { formatNumber, formatDate } from "@/lib/format";
+import Link from "next/link";
+import { X, Bookmark, ExternalLink } from "lucide-react";
+import { formatNumber, formatDate, parseDuration } from "@/lib/format";
+import { calcEngagementRate, calcViewsPerHour } from "@/lib/viral-score";
+import { getCategoryName } from "@/lib/categories";
 import { buttonPrimary, buttonSecondary } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
 import type { VideoWithStats } from "@/types/youtube";
@@ -28,6 +31,14 @@ export function VideoModal({
 
   if (!video) return null;
 
+  const engagementRate = calcEngagementRate(
+    video.viewCount,
+    video.likeCount,
+    video.commentCount
+  );
+  const viewsPerHour = calcViewsPerHour(video.viewCount, video.publishedAt);
+  const categoryName = getCategoryName(video.categoryId);
+
   return (
     <div
       className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[1000] flex items-center justify-center p-4 sm:p-5"
@@ -49,7 +60,17 @@ export function VideoModal({
           {video.title}
         </h3>
         <p className="text-[var(--blue2)] text-sm mb-4">
-          📺 {video.channelTitle}
+          {video.channelId ? (
+            <Link
+              href={`/channels/${video.channelId}`}
+              className="hover:underline inline-flex items-center gap-1"
+            >
+              📺 {video.channelTitle}
+              <ExternalLink className="size-3" />
+            </Link>
+          ) : (
+            <>📺 {video.channelTitle}</>
+          )}
         </p>
 
         <div className="aspect-video rounded-xl overflow-hidden mb-4 bg-black">
@@ -76,10 +97,70 @@ export function VideoModal({
           <span className="text-[var(--text3)]">
             🕐 {formatDate(video.publishedAt)}
           </span>
+          {video.duration && (
+            <span className="text-[var(--text3)]">
+              ⏱ {parseDuration(video.duration)}
+            </span>
+          )}
           <span className="font-bold text-[var(--accent)]">
             Viral Score: {video.viralScore}
           </span>
         </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 p-3 bg-[var(--card)] rounded-xl border border-[var(--border)]">
+          <div>
+            <div className="text-[10px] text-[var(--text3)] font-mono uppercase tracking-wider">
+              Engagement
+            </div>
+            <div className="text-sm font-semibold text-[var(--green)]">
+              {engagementRate.toFixed(2)}%
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] text-[var(--text3)] font-mono uppercase tracking-wider">
+              Views/hora
+            </div>
+            <div className="text-sm font-semibold text-[var(--blue2)]">
+              {formatNumber(viewsPerHour)}
+            </div>
+          </div>
+          {categoryName && (
+            <div>
+              <div className="text-[10px] text-[var(--text3)] font-mono uppercase tracking-wider">
+                Categoria
+              </div>
+              <div className="text-sm font-semibold">{categoryName}</div>
+            </div>
+          )}
+          {video.definition && (
+            <div>
+              <div className="text-[10px] text-[var(--text3)] font-mono uppercase tracking-wider">
+                Definição
+              </div>
+              <div className="text-sm font-semibold uppercase">
+                {video.definition}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {video.tags && video.tags.length > 0 && (
+          <div className="mb-4">
+            <div className="text-[10px] text-[var(--text3)] font-mono uppercase tracking-wider mb-2">
+              Tags
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {video.tags.slice(0, 12).map((tag) => (
+                <span
+                  key={tag}
+                  className="px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--border)] text-[11px] text-[var(--text2)]"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-2.5">
           <a

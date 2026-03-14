@@ -5,6 +5,7 @@ import { Bell, Plus } from "lucide-react";
 import { PageHeader, Spinner, EmptyState } from "@/components/ui";
 import { input, buttonPrimary, card } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
+import { ChannelSearchInput, type ChannelOption } from "@/components/search/ChannelSearchInput";
 
 interface Alert {
   id: string;
@@ -19,6 +20,7 @@ export default function AlertsPage() {
   const [loading, setLoading] = useState(true);
   const [type, setType] = useState("keyword");
   const [value, setValue] = useState("");
+  const [selectedChannel, setSelectedChannel] = useState<ChannelOption | null>(null);
 
   const fetchAlerts = () => {
     fetch("/api/alerts")
@@ -32,20 +34,28 @@ export default function AlertsPage() {
     fetchAlerts();
   }, []);
 
+  useEffect(() => {
+    if (type !== "channel") setSelectedChannel(null);
+  }, [type]);
+
   const handleCreate = async () => {
-    if (!value.trim()) return;
+    const val = type === "channel" ? selectedChannel?.channelId : value.trim();
+    if (!val) return;
     try {
       await fetch("/api/alerts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, value: value.trim() }),
+        body: JSON.stringify({ type, value: val }),
       });
       setValue("");
+      setSelectedChannel(null);
       fetchAlerts();
     } catch {
       // ignore
     }
   };
+
+  const canCreate = type === "channel" ? !!selectedChannel : !!value.trim();
 
   return (
     <div>
@@ -54,7 +64,7 @@ export default function AlertsPage() {
         description="Configura alertas para keywords e canais"
       />
 
-      <div className="flex flex-col sm:flex-row gap-2 mb-6 flex-wrap">
+      <div className="flex flex-col sm:flex-row gap-2 mb-6 flex-wrap items-stretch">
         <select
           value={type}
           onChange={(e) => setType(e.target.value)}
@@ -63,17 +73,42 @@ export default function AlertsPage() {
           <option value="keyword">Keyword</option>
           <option value="channel">Canal</option>
         </select>
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-          placeholder={type === "keyword" ? "Palavra-chave..." : "ID do canal..."}
-          className={cn(input, "flex-1 min-w-0")}
-        />
+        {type === "channel" ? (
+          <div className="flex-1 min-w-[200px]">
+            {selectedChannel ? (
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--card)] border border-[var(--border)] h-full">
+                <div className="size-8 rounded-full bg-[var(--bg3)] overflow-hidden shrink-0">
+                  {selectedChannel.thumbnail && <img src={selectedChannel.thumbnail} alt="" className="w-full h-full object-cover" />}
+                </div>
+                <span className="font-semibold truncate flex-1">{selectedChannel.name}</span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedChannel(null)}
+                  className="text-[var(--text3)] hover:text-[var(--accent)] text-xs"
+                >
+                  Trocar
+                </button>
+              </div>
+            ) : (
+              <ChannelSearchInput
+                onSelect={(ch) => setSelectedChannel(ch)}
+                placeholder="Pesquisa canal..."
+              />
+            )}
+          </div>
+        ) : (
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+            placeholder="Palavra-chave..."
+            className={cn(input, "flex-1 min-w-0")}
+          />
+        )}
         <button
           onClick={handleCreate}
-          disabled={!value.trim()}
+          disabled={!canCreate}
           className={cn(buttonPrimary, "flex items-center gap-2 px-4 py-2")}
         >
           <Plus className="size-4" /> Adicionar

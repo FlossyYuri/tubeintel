@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Search } from "lucide-react";
-import { input, buttonPrimary } from "@/lib/design-tokens";
-import { cn } from "@/lib/utils";
+import { useState } from 'react';
+import { Search } from 'lucide-react';
+import { input, buttonPrimary } from '@/lib/design-tokens';
+import { cn } from '@/lib/utils';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -14,9 +14,9 @@ interface SearchBarProps {
 export function SearchBar({
   onSearch,
   loading = false,
-  placeholder = "Ex: receitas rápidas, tutorial python, motivação...",
+  placeholder = 'Ex: receitas rápidas, tutorial python, motivação...',
 }: SearchBarProps) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,29 +26,32 @@ export function SearchBar({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col sm:flex-row gap-2.5 flex-1 w-full min-w-0"
+      className='flex flex-col sm:flex-row gap-2.5 flex-1 w-full'
+      suppressHydrationWarning
     >
       <input
-        type="text"
+        type='text'
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={placeholder}
-        className={cn(input, "w-full min-w-0")}
+        className={cn(input, 'w-full min-w-8')}
         disabled={loading}
+        suppressHydrationWarning
       />
       <button
-        type="submit"
+        type='submit'
         disabled={loading || !query.trim()}
+        suppressHydrationWarning
         className={cn(
           buttonPrimary,
-          "flex items-center justify-center gap-2 w-full sm:w-auto shrink-0"
+          'flex items-center justify-center gap-2 w-full sm:w-auto shrink-0',
         )}
       >
         {loading ? (
-          "A pesquisar..."
+          'A pesquisar...'
         ) : (
           <>
-            <Search className="size-4" />
+            <Search className='size-4' />
             Pesquisar
           </>
         )}

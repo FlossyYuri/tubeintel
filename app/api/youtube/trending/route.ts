@@ -8,24 +8,30 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const regionCode = searchParams.get("regionCode") || "PT";
     const videoCategoryId = searchParams.get("videoCategoryId") || "0";
+    const pageToken = searchParams.get("pageToken") || "";
 
-    const key = cacheKey("trending", "videos", { regionCode, videoCategoryId });
-    const cached = cache.get<YouTubeVideosResponse>(key);
+    const cacheParams = { regionCode, videoCategoryId, pageToken };
+    const key = cacheKey("trending", "videos", cacheParams);
+    const cached = cache.get<YouTubeVideosResponse & { nextPageToken?: string }>(key);
     if (cached) {
       return NextResponse.json(cached);
     }
 
-    const data = await youtubeFetch<YouTubeVideosResponse>("videos", {
+    const params: Record<string, string> = {
       part: "snippet,statistics,contentDetails",
       chart: "mostPopular",
       regionCode,
       videoCategoryId,
       maxResults: "24",
-    });
+    };
+    if (pageToken) params.pageToken = pageToken;
 
-    cache.set(key, data, getCacheTTL("trending"));
+    const data = await youtubeFetch<YouTubeVideosResponse & { nextPageToken?: string }>("videos", params);
 
-    return NextResponse.json(data);
+    const result = { items: data.items || [], nextPageToken: data.nextPageToken };
+    cache.set(key, result, getCacheTTL("trending"));
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error("YouTube trending error:", error);
     return NextResponse.json(

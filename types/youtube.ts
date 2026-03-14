@@ -11,6 +11,9 @@ export interface YouTubeSearchItem {
       high?: { url: string };
     };
     channelTitle: string;
+    tags?: string[];
+    categoryId?: string;
+    liveBroadcastContent?: string;
   };
 }
 
@@ -22,6 +25,8 @@ export interface YouTubeVideoStatistics {
 
 export interface YouTubeContentDetails {
   duration: string;
+  definition?: string;
+  caption?: string;
 }
 
 export interface YouTubeVideoItem {
@@ -76,4 +81,9 @@ export interface VideoWithStats {
   commentCount: number;
   duration?: string;
   viralScore: number;
+  tags?: string[];
+  categoryId?: string;
+  definition?: string;
+  caption?: string;
+  liveBroadcastContent?: string;
 }

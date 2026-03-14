@@ -4,8 +4,16 @@ import { cache, getCacheTTL, cacheKey, type CacheType } from "./cache";
 const YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3";
 
 export async function getApiKey(): Promise<string> {
-  const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-  return settings?.apiKey ?? process.env.YOUTUBE_API_KEY ?? "";
+  const fromEnv = process.env.YOUTUBE_API_KEY?.trim();
+  if (fromEnv) return fromEnv;
+  try {
+    const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+    const fromDb = settings?.apiKey?.trim();
+    if (fromDb) return fromDb;
+  } catch {
+    // Settings table may not exist
+  }
+  return "";
 }
 
 export async function validateApiKey(key: string): Promise<boolean> {

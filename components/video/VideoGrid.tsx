@@ -9,9 +9,11 @@ import type { VideoWithStats } from "@/types/youtube";
 interface VideoGridProps {
   videos: VideoWithStats[];
   onVideoOpen?: (video: VideoWithStats) => void;
+  /** Optional extra props per video (e.g. outperformanceRatio) */
+  getVideoCardProps?: (video: VideoWithStats) => { outperformanceRatio?: number };
 }
 
-export function VideoGrid({ videos, onVideoOpen }: VideoGridProps) {
+export function VideoGrid({ videos, onVideoOpen, getVideoCardProps }: VideoGridProps) {
   const [listView, setListView] = useState(false);
 
   return (
@@ -58,6 +60,7 @@ export function VideoGrid({ videos, onVideoOpen }: VideoGridProps) {
             video={video}
             listView={listView}
             onOpen={onVideoOpen}
+            {...getVideoCardProps?.(video)}
           />
         ))}
       </div>

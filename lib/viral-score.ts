@@ -29,3 +29,13 @@ export function getViralScoreColor(score: number): string {
   if (score >= 40) return "var(--green)";
   return "var(--blue)";
 }
+
+export function calcEngagementRate(views: number, likes: number, comments: number): number {
+  if (!views || views <= 0) return 0;
+  return ((likes + comments * 2) / views) * 100;
+}
+
+export function calcViewsPerHour(views: number, publishedAt: string): number {
+  const ageHours = (Date.now() - new Date(publishedAt).getTime()) / 3_600_000;
+  return views / Math.max(ageHours, 0.01);
+}

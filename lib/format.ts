@@ -30,13 +30,23 @@ export function parseDuration(iso: string): string {
   return `${min}:${String(s).padStart(2, "0")}`;
 }
 
-export function isShort(duration: string, title = ""): boolean {
-  if (!duration) return false;
-  const m = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-  if (!m) return false;
-  const total =
+export function getDurationSeconds(iso: string): number {
+  if (!iso) return 0;
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!m) return 0;
+  return (
     parseInt(m[1] || "0", 10) * 3600 +
     parseInt(m[2] || "0", 10) * 60 +
-    parseInt(m[3] || "0", 10);
+    parseInt(m[3] || "0", 10)
+  );
+}
+
+export function isShort(duration: string, title = ""): boolean {
+  if (!duration) return false;
+  const total = getDurationSeconds(duration);
   return total <= 60 || title.toLowerCase().includes("#short");
+}
+
+export function isLongForm(duration: string): boolean {
+  return getDurationSeconds(duration) > 240;
 }

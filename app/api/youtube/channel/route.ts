@@ -11,15 +11,24 @@ export async function GET(request: NextRequest) {
 
     if (channelId) {
       const key = cacheKey("channel", "channels", { channelId });
-      const cached = cache.get<YouTubeChannelsResponse>(key);
+      const cached = cache.get<{ channels: YouTubeChannelsResponse; search: { items: unknown[] } }>(key);
       if (cached) return NextResponse.json(cached);
 
       const data = await youtubeFetch<YouTubeChannelsResponse>("channels", {
         part: "statistics,snippet,contentDetails",
         id: channelId,
       });
-      cache.set(key, data, getCacheTTL("channel"));
-      return NextResponse.json(data);
+      const formatted = {
+        channels: data,
+        search: {
+          items: (data.items || []).map((ch) => ({
+            id: { channelId: ch.id },
+            snippet: ch.snippet,
+          })),
+        },
+      };
+      cache.set(key, formatted, getCacheTTL("channel"));
+      return NextResponse.json(formatted);
     }
 
     if (!q.trim()) {

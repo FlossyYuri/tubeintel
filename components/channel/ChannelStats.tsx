@@ -56,6 +56,7 @@ interface ChannelStatsProps {
   viewCount: number;
   videoCount: number;
   avgViews: number;
+  avgEngagement?: number;
 }
 
 export function ChannelStats({
@@ -63,9 +64,10 @@ export function ChannelStats({
   viewCount,
   videoCount,
   avgViews,
+  avgEngagement,
 }: ChannelStatsProps) {
   return (
-    <div className='mb-5 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4'>
+    <div className='mb-5 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4 lg:grid-cols-5'>
       <StatCard
         label='Subscribers'
         value={formatNumber(subscriberCount)}
@@ -82,6 +84,13 @@ export function ChannelStats({
         value={formatNumber(avgViews)}
         color='purple'
       />
+      {avgEngagement !== undefined && avgEngagement > 0 && (
+        <StatCard
+          label='Engagement'
+          value={`${avgEngagement.toFixed(2)}%`}
+          color='purple'
+        />
+      )}
     </div>
   );
 }

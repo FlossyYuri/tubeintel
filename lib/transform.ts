@@ -17,20 +17,28 @@ export function transformToVideoWithStats(
   return {
     id: videoId,
     videoId,
-    title: searchItem.snippet?.title || "",
-    channelTitle: searchItem.snippet?.channelTitle || "",
-    channelId: searchItem.snippet?.channelId || "",
+    title: searchItem.snippet?.title || videoItem?.snippet?.title || "",
+    channelTitle: searchItem.snippet?.channelTitle || videoItem?.snippet?.channelTitle || "",
+    channelId: searchItem.snippet?.channelId || videoItem?.snippet?.channelId || "",
     publishedAt,
     thumbnail:
       searchItem.snippet?.thumbnails?.medium?.url ||
       searchItem.snippet?.thumbnails?.high?.url ||
       searchItem.snippet?.thumbnails?.default?.url ||
+      videoItem?.snippet?.thumbnails?.medium?.url ||
+      videoItem?.snippet?.thumbnails?.high?.url ||
+      videoItem?.snippet?.thumbnails?.default?.url ||
       "",
     viewCount,
     likeCount,
     commentCount,
     duration: videoItem?.contentDetails?.duration,
     viralScore,
+    tags: videoItem?.snippet?.tags,
+    categoryId: videoItem?.snippet?.categoryId,
+    definition: videoItem?.contentDetails?.definition,
+    caption: videoItem?.contentDetails?.caption,
+    liveBroadcastContent: videoItem?.snippet?.liveBroadcastContent,
   };
 }
 

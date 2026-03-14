@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { VideoGrid } from "@/components/video/VideoGrid";
 import { VideoModal } from "@/components/video/VideoModal";
+import { SortControls } from "@/components/video/SortControls";
 import { Spinner, EmptyState } from "@/components/ui";
-import { sectionTitle } from "@/lib/design-tokens";
+import { sortVideos, type VideoSortKey } from "@/lib/sort-videos";
 import type { VideoWithStats } from "@/types/youtube";
 
 interface SavedVideo {
@@ -25,6 +26,7 @@ export default function CollectionDetailPage() {
   const id = params.id as string;
   const [collection, setCollection] = useState<{ name: string; items: SavedVideo[] } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<VideoSortKey>("views");
 
   useEffect(() => {
     fetch(`/api/collections/${id}`)
@@ -37,7 +39,7 @@ export default function CollectionDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const videos: VideoWithStats[] = (collection?.items || []).map((v) => ({
+  const rawVideos: VideoWithStats[] = (collection?.items || []).map((v) => ({
     id: v.videoId,
     videoId: v.videoId,
     title: v.title,
@@ -50,6 +52,11 @@ export default function CollectionDetailPage() {
     commentCount: 0,
     viralScore: v.viralScore,
   }));
+
+  const videos = useMemo(
+    () => sortVideos(rawVideos, sortBy),
+    [rawVideos, sortBy]
+  );
 
   const [selectedVideo, setSelectedVideo] = useState<VideoWithStats | null>(null);
 
@@ -80,7 +87,16 @@ export default function CollectionDetailPage() {
       <h2 className="text-xl font-extrabold mb-2 font-display">
         {collection.name}
       </h2>
-      <p className="text-sm text-[var(--text3)] mb-6">{collection.items.length} vídeos</p>
+      <div className="flex flex-wrap items-center gap-2 mb-6">
+        <p className="text-sm text-[var(--text3)]">{collection.items.length} vídeos</p>
+        {videos.length > 0 && (
+          <SortControls
+            value={sortBy}
+            onChange={setSortBy}
+            options={["views", "viral"]}
+          />
+        )}
+      </div>
       {videos.length === 0 ? (
         <EmptyState
           icon="📹"

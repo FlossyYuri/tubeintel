@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -16,6 +16,9 @@ import {
   Settings,
   X,
   BarChart2,
+  Sparkles,
+  Trophy,
+  BookOpen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -25,6 +28,8 @@ const navSections = [
     items: [
       { href: '/search', label: 'Pesquisar Vídeos', icon: Search },
       { href: '/trending', label: 'Trending', icon: Flame, isLive: true },
+      { href: '/discover', label: 'Discover Outperformers', icon: Sparkles },
+      { href: '/rankings', label: 'Rankings', icon: Trophy },
       { href: '/niches', label: 'Nichos', icon: Target },
     ],
   },
@@ -38,7 +43,10 @@ const navSections = [
   },
   {
     title: 'Formatos',
-    items: [{ href: '/shorts', label: 'Shorts Virais', icon: Zap }],
+    items: [
+      { href: '/shorts', label: 'Shorts Virais', icon: Zap },
+      { href: '/study', label: 'Estudo Viral', icon: BookOpen },
+    ],
   },
   {
     title: 'Organização',
@@ -247,12 +255,51 @@ interface SidebarProps {
 
 export function Sidebar({ open = false, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const [isClosing, setIsClosing] = useState(false);
+  const isDrawerVisible = open || isClosing;
+  const closingRef = useRef(false);
 
+  const handleClose = useCallback(() => {
+    if (!onClose || closingRef.current) return;
+    closingRef.current = true;
+    setIsClosing(true);
+    const timer = setTimeout(() => {
+      onClose();
+      setIsClosing(false);
+      closingRef.current = false;
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  // Fecha ao navegar (sem animação)
   useEffect(() => {
     if (open && onClose) {
+      setIsClosing(false);
+      closingRef.current = false;
       onClose();
     }
   }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Bloqueia scroll do body quando sidebar aberta no mobile
+  useEffect(() => {
+    if (open) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [open]);
+
+  // Fecha com tecla ESC
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, handleClose]);
 
   const sidebarClasses =
     'relative w-64 min-h-screen flex flex-col overflow-hidden bg-[#0a0a0f] border-r border-white/[0.06] fixed top-0 left-0 z-[100]';
@@ -265,7 +312,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
       </aside>
 
       {/* Mobile drawer */}
-      {open && (
+      {isDrawerVisible && (
         <div
           className='fixed inset-0 z-[200] lg:hidden'
           aria-modal='true'
@@ -273,8 +320,11 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
           aria-label='Menu de navegação'
         >
           <button
-            onClick={onClose}
-            className='absolute inset-0 bg-black/80 backdrop-blur-sm'
+            onClick={handleClose}
+            className={cn(
+              'absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-200',
+              isClosing && 'opacity-0',
+            )}
             aria-label='Fechar menu'
           />
           <aside
@@ -282,10 +332,10 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
               'absolute left-0 top-0 flex h-full w-72 max-w-[90vw] flex-col',
               'bg-[#0a0a0f] border-r border-white/[0.06]',
               'shadow-[4px_0_32px_rgba(0,0,0,0.6)]',
-              'animate-slide-in-left',
+              isClosing ? 'animate-slide-out-left' : 'animate-slide-in-left',
             )}
           >
-            <SidebarContent onNavigate={onClose} onClose={onClose} />
+            <SidebarContent onNavigate={onClose} onClose={handleClose} />
           </aside>
         </div>
       )}

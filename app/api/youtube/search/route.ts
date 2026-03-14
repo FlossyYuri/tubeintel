@@ -11,6 +11,9 @@ export async function GET(request: NextRequest) {
     const regionCode = searchParams.get("regionCode") || "PT";
     const publishedAfter = searchParams.get("publishedAfter") || "";
     const videoDuration = searchParams.get("videoDuration") || "";
+    const videoCategoryId = searchParams.get("videoCategoryId") || "";
+    const videoDefinition = searchParams.get("videoDefinition") || "";
+    const videoCaption = searchParams.get("videoCaption") || "";
     const pageToken = searchParams.get("pageToken") || "";
     const maxResults = Math.min(parseInt(searchParams.get("maxResults") || "24", 10), 50);
 
@@ -21,7 +24,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const cacheParams = { q, order, regionCode, publishedAfter, videoDuration, pageToken };
+    const cacheParams = {
+      q,
+      order,
+      regionCode,
+      publishedAfter,
+      videoDuration,
+      videoCategoryId,
+      videoDefinition,
+      videoCaption,
+      pageToken,
+    };
     const key = cacheKey("search", "search", cacheParams);
     const cached = cache.get<{ search: YouTubeSearchResponse; videos: YouTubeVideosResponse }>(key);
     if (cached) {
@@ -39,6 +52,9 @@ export async function GET(request: NextRequest) {
 
     if (publishedAfter) searchParamsObj.publishedAfter = publishedAfter;
     if (videoDuration) searchParamsObj.videoDuration = videoDuration;
+    if (videoCategoryId) searchParamsObj.videoCategoryId = videoCategoryId;
+    if (videoDefinition) searchParamsObj.videoDefinition = videoDefinition;
+    if (videoCaption) searchParamsObj.videoCaption = videoCaption;
     if (pageToken) searchParamsObj.pageToken = pageToken;
 
     if (["PT", "BR", "AO", "MZ"].includes(regionCode)) {
@@ -63,7 +79,7 @@ export async function GET(request: NextRequest) {
     let videosData: YouTubeVideosResponse = { items: [] };
     if (videoIds) {
       videosData = await youtubeFetch<YouTubeVideosResponse>("videos", {
-        part: "statistics,contentDetails",
+        part: "snippet,statistics,contentDetails",
         id: videoIds,
       });
     }

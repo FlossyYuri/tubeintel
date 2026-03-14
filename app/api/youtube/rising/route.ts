@@ -11,14 +11,15 @@ export async function GET(request: NextRequest) {
     const regionCode = searchParams.get("regionCode") || "PT";
     const maxAgeMonths = parseInt(searchParams.get("maxAgeMonths") || "18", 10);
     const maxVideos = parseInt(searchParams.get("maxVideos") || "30", 10);
+    const pageToken = searchParams.get("pageToken") || "";
 
-    const key = cacheKey("rising", "rising", { keyword, regionCode, maxAgeMonths: String(maxAgeMonths), maxVideos: String(maxVideos) });
+    const key = cacheKey("rising", "rising", { keyword, regionCode, maxAgeMonths: String(maxAgeMonths), maxVideos: String(maxVideos), pageToken });
     const cached = cache.get<{ channels: Array<Record<string, unknown>> }>(key);
     if (cached) return NextResponse.json(cached);
 
     const publishedAfter = new Date(Date.now() - 90 * 86400000).toISOString();
 
-    const searchData = await youtubeFetch<YouTubeSearchResponse>("search", {
+    const searchParamsObj: Record<string, string> = {
       part: "snippet",
       q: keyword,
       type: "video",
@@ -26,7 +27,9 @@ export async function GET(request: NextRequest) {
       regionCode,
       maxResults: "50",
       publishedAfter,
-    });
+    };
+    if (pageToken) searchParamsObj.pageToken = pageToken;
+    const searchData = await youtubeFetch<YouTubeSearchResponse>("search", searchParamsObj);
 
     const videoIds = searchData.items
       ?.map((i) => i.id?.videoId)
@@ -95,7 +98,7 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => (b?.risingScore ?? 0) - (a?.risingScore ?? 0))
       .slice(0, 15);
 
-    const result = { channels: risingChannels };
+    const result = { channels: risingChannels, nextPageToken: searchData.nextPageToken };
     cache.set(key, result, getCacheTTL("rising"));
     return NextResponse.json(result);
   } catch (error) {

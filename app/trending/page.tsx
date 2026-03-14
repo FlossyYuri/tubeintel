@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { VideoGrid } from "@/components/video/VideoGrid";
 import { VideoModal } from "@/components/video/VideoModal";
+import { SortControls } from "@/components/video/SortControls";
 import { Spinner, EmptyState, ErrorMessage } from "@/components/ui";
 import { PageHeader } from "@/components/ui";
 import { sectionTitle } from "@/lib/design-tokens";
 import { calcViralScore } from "@/lib/viral-score";
-import { parseDuration, isShort } from "@/lib/format";
+import { parseDuration, isShort, getDurationSeconds } from "@/lib/format";
+import { sortVideos, type VideoSortKey } from "@/lib/sort-videos";
 import type { VideoWithStats } from "@/types/youtube";
 import type { YouTubeVideoItem } from "@/types/youtube";
 
@@ -54,6 +56,11 @@ function transformVideo(v: YouTubeVideoItem): VideoWithStats {
     commentCount,
     duration: v.contentDetails?.duration,
     viralScore: calcViralScore(viewCount, likeCount, commentCount, publishedAt),
+    tags: v.snippet?.tags,
+    categoryId: v.snippet?.categoryId,
+    definition: v.contentDetails?.definition,
+    caption: v.contentDetails?.caption,
+    liveBroadcastContent: v.snippet?.liveBroadcastContent,
   };
 }
 
@@ -61,14 +68,18 @@ export default function TrendingPage() {
   const [country, setCountry] = useState("PT");
   const [category, setCategory] = useState("0");
   const [videos, setVideos] = useState<VideoWithStats[]>([]);
+  const [nextPageToken, setNextPageToken] = useState<string | undefined>();
+  const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedVideo, setSelectedVideo] = useState<VideoWithStats | null>(null);
-  const [shortsOnly, setShortsOnly] = useState(false);
+  const [formatFilter, setFormatFilter] = useState<"all" | "shorts" | "longform">("all");
+  const [sortBy, setSortBy] = useState<VideoSortKey>("views");
 
   useEffect(() => {
     setLoading(true);
     setError("");
+    setNextPageToken(undefined);
     fetch(
       `/api/youtube/trending?regionCode=${country}&videoCategoryId=${category}`
     )
@@ -77,6 +88,7 @@ export default function TrendingPage() {
         if (data.error) throw new Error(data.error);
         const items = (data.items || []).map(transformVideo);
         setVideos(items);
+        setNextPageToken(data.nextPageToken);
       })
       .catch((err) => {
         setError(err.message);
@@ -85,9 +97,36 @@ export default function TrendingPage() {
       .finally(() => setLoading(false));
   }, [country, category]);
 
-  const filteredVideos = shortsOnly
-    ? videos.filter((v) => isShort(v.duration || "", v.title))
-    : videos;
+  const loadMore = async () => {
+    if (!nextPageToken || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(
+        `/api/youtube/trending?regionCode=${country}&videoCategoryId=${category}&pageToken=${encodeURIComponent(nextPageToken)}`
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      const items = (data.items || []).map(transformVideo);
+      setVideos((prev) => [...prev, ...items]);
+      setNextPageToken(data.nextPageToken);
+    } catch {
+      // Silently fail
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const filteredVideos =
+    formatFilter === "shorts"
+      ? videos.filter((v) => isShort(v.duration || "", v.title))
+      : formatFilter === "longform"
+        ? videos.filter((v) => getDurationSeconds(v.duration || "") > 240)
+        : videos;
+
+  const sortedVideos = useMemo(
+    () => sortVideos(filteredVideos, sortBy),
+    [filteredVideos, sortBy]
+  );
 
   return (
     <div>
@@ -132,17 +171,25 @@ export default function TrendingPage() {
         ))}
       </div>
 
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => setShortsOnly(!shortsOnly)}
-          className={`px-3 py-1.5 text-xs font-mono rounded-lg border transition-colors ${
-            shortsOnly
-              ? "bg-[rgba(176,109,255,0.15)] border-[var(--purple)] text-[var(--purple)]"
-              : "border-[var(--border)] text-[var(--text2)] hover:border-[var(--purple)]"
-          }`}
-        >
-          ⚡ Shorts apenas
-        </button>
+      <div className="flex flex-wrap gap-2 mb-4 items-center">
+        <div className="flex gap-1 p-1 bg-[var(--card)] rounded-lg border border-[var(--border)]">
+          {(["all", "shorts", "longform"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFormatFilter(f)}
+              className={`px-3 py-1.5 text-xs font-mono rounded transition-colors ${
+                formatFilter === f
+                  ? "bg-[var(--card2)] text-[var(--text)]"
+                  : "text-[var(--text3)] hover:text-[var(--text)]"
+              }`}
+            >
+              {f === "all" ? "Todos" : f === "shorts" ? "⚡ Shorts" : "📺 Long Form"}
+            </button>
+          ))}
+        </div>
+        {!loading && filteredVideos.length > 0 && (
+          <SortControls value={sortBy} onChange={setSortBy} />
+        )}
       </div>
 
       {error && <ErrorMessage message={error} className="mb-5" />}
@@ -167,7 +214,18 @@ export default function TrendingPage() {
               {filteredVideos.length} vídeos em alta
             </div>
           </div>
-          <VideoGrid videos={filteredVideos} onVideoOpen={setSelectedVideo} />
+          <VideoGrid videos={sortedVideos} onVideoOpen={setSelectedVideo} />
+          {nextPageToken && (
+            <div className="mt-6 text-center">
+              <button
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="px-6 py-3 bg-[var(--card2)] border border-[var(--border2)] text-[var(--text)] text-sm font-semibold rounded-xl hover:bg-[var(--border)] transition-colors duration-200 disabled:opacity-50 font-display"
+              >
+                {loadingMore ? "A carregar..." : "Carregar mais"}
+              </button>
+            </div>
+          )}
         </>
       )}
 

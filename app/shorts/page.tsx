@@ -6,6 +6,7 @@ import { VideoModal } from "@/components/video/VideoModal";
 import { PageHeader, Spinner, EmptyState, ErrorMessage } from "@/components/ui";
 import { input, buttonPrimary } from "@/lib/design-tokens";
 import { mergeSearchWithVideos } from "@/lib/transform";
+import { isShort } from "@/lib/format";
 import type { VideoWithStats } from "@/types/youtube";
 
 const REGIONS = [
@@ -19,37 +20,54 @@ export default function ShortsPage() {
   const [query, setQuery] = useState("");
   const [region, setRegion] = useState("PT");
   const [videos, setVideos] = useState<VideoWithStats[]>([]);
+  const [nextPageToken, setNextPageToken] = useState<string | undefined>();
+  const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedVideo, setSelectedVideo] = useState<VideoWithStats | null>(null);
 
-  const handleSearch = async () => {
-    if (!query.trim()) return;
-    setError("");
-    setLoading(true);
+  const searchQuery = query.trim() ? `${query.trim()} #shorts` : "#shorts";
+  const publishedAfter = new Date(Date.now() - 14 * 86400000).toISOString();
+
+  const doSearch = async (pageToken?: string, append = false) => {
+    if (!append) {
+      setError("");
+      setLoading(true);
+    } else {
+      setLoadingMore(true);
+    }
     try {
-      const publishedAfter = new Date(Date.now() - 14 * 86400000).toISOString();
       const params = new URLSearchParams({
-        q: query + " #shorts",
-        type: "video",
+        q: searchQuery,
         videoDuration: "short",
         order: "viewCount",
         regionCode: region,
         maxResults: "24",
         publishedAfter,
       });
+      if (pageToken) params.set("pageToken", pageToken);
       const res = await fetch(`/api/youtube/search?${params}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Search failed");
       const merged = mergeSearchWithVideos(data.search?.items || [], data.videos?.items || []);
-      setVideos(merged.filter((v) => (v.duration && v.duration.match(/PT(\d+)S/) && parseInt(v.duration.match(/PT(\d+)S/)?.[1] || "0", 10) <= 60) || v.title.toLowerCase().includes("short")));
+      const filtered = merged.filter((v) => isShort(v.duration || "", v.title));
+      if (append) {
+        setVideos((prev) => [...prev, ...filtered]);
+      } else {
+        setVideos(filtered);
+      }
+      setNextPageToken(data.search?.nextPageToken);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro");
-      setVideos([]);
+      if (!append) setVideos([]);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
+
+  const handleSearch = () => doSearch();
+  const loadMore = () => nextPageToken && doSearch(nextPageToken, true);
 
   return (
     <div>
@@ -97,7 +115,20 @@ export default function ShortsPage() {
       ) : videos.length === 0 && !loading ? (
         <EmptyState icon="⚡" title="Sem shorts encontrados" />
       ) : (
-        <VideoGrid videos={videos} onVideoOpen={setSelectedVideo} />
+        <>
+          <VideoGrid videos={videos} onVideoOpen={setSelectedVideo} />
+          {nextPageToken && (
+            <div className="mt-6 text-center">
+              <button
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="px-6 py-3 bg-[var(--card2)] border border-[var(--border2)] text-[var(--text)] text-sm font-semibold rounded-xl hover:bg-[var(--border)] transition-colors duration-200 disabled:opacity-50 font-display"
+              >
+                {loadingMore ? "A carregar..." : "Carregar mais"}
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {selectedVideo && (

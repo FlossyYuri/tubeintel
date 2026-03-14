@@ -8,6 +8,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const channelId = searchParams.get("channelId") || "";
     const maxResults = searchParams.get("maxResults") || "12";
+    const pageToken = searchParams.get("pageToken") || "";
+    const orderParam = searchParams.get("order") || "date";
+    const order = ["date", "viewCount", "relevance", "rating"].includes(orderParam)
+      ? orderParam
+      : "date";
 
     if (!channelId) {
       return NextResponse.json(
@@ -16,17 +21,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const key = cacheKey("channel", "channel-videos", { channelId, maxResults });
+    const key = cacheKey("channel", "channel-videos", { channelId, maxResults, pageToken, order });
     const cached = cache.get<{ search: YouTubeSearchResponse; videos: YouTubeVideosResponse }>(key);
     if (cached) return NextResponse.json(cached);
 
-    const searchData = await youtubeFetch<YouTubeSearchResponse>("search", {
+    const searchParamsObj: Record<string, string> = {
       part: "snippet",
       channelId,
-      order: "date",
+      order,
       type: "video",
       maxResults,
-    });
+    };
+    if (pageToken) searchParamsObj.pageToken = pageToken;
+
+    const searchData = await youtubeFetch<YouTubeSearchResponse>("search", searchParamsObj);
 
     const videoIds = searchData.items
       ?.map((i) => i.id?.videoId)
@@ -37,12 +45,16 @@ export async function GET(request: NextRequest) {
     let videosData: YouTubeVideosResponse = { items: [] };
     if (videoIds) {
       videosData = await youtubeFetch<YouTubeVideosResponse>("videos", {
-        part: "statistics,contentDetails",
+        part: "snippet,statistics,contentDetails",
         id: videoIds,
       });
     }
 
-    const result = { search: searchData, videos: videosData };
+    const result = {
+      search: searchData,
+      videos: videosData,
+      nextPageToken: searchData.nextPageToken,
+    };
     cache.set(key, result, getCacheTTL("channel"));
     return NextResponse.json(result);
   } catch (error) {

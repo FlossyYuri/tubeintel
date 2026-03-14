@@ -29,17 +29,21 @@ export default function RisingPage() {
     viewsPerVideo: number;
     risingScore: number;
   }>>([]);
+  const [nextPageToken, setNextPageToken] = useState<string | undefined>();
+  const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     setLoading(true);
     setError("");
+    setNextPageToken(undefined);
     fetch(`/api/youtube/rising?keyword=${encodeURIComponent(searchKeyword)}&regionCode=${region}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.error) throw new Error(data.error);
         setChannels(data.channels || []);
+        setNextPageToken(data.nextPageToken);
       })
       .catch((err) => {
         setError(err.message);
@@ -47,6 +51,24 @@ export default function RisingPage() {
       })
       .finally(() => setLoading(false));
   }, [searchKeyword, region]);
+
+  const loadMore = async () => {
+    if (!nextPageToken || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(
+        `/api/youtube/rising?keyword=${encodeURIComponent(searchKeyword)}&regionCode=${region}&pageToken=${encodeURIComponent(nextPageToken)}`
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setChannels((prev) => [...prev, ...(data.channels || [])]);
+      setNextPageToken(data.nextPageToken);
+    } catch {
+      // Silently fail
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   return (
     <div>
@@ -120,6 +142,17 @@ export default function RisingPage() {
               </div>
             </Link>
           ))}
+          {nextPageToken && (
+            <div className="mt-6 text-center">
+              <button
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="px-6 py-3 bg-[var(--card2)] border border-[var(--border2)] text-[var(--text)] text-sm font-semibold rounded-xl hover:bg-[var(--border)] transition-colors duration-200 disabled:opacity-50 font-display"
+              >
+                {loadingMore ? "A carregar..." : "Carregar mais"}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
