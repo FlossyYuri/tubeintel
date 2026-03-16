@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { formatNumber } from '@/lib/format';
 import { ArrowUpRight } from 'lucide-react';
+import type { ChannelWithStats } from '@/types/youtube';
 
 interface ChannelCardProps {
   channelId: string;
@@ -13,6 +14,9 @@ interface ChannelCardProps {
   videoCount: number;
   viewCount: number;
   description?: string;
+  /** Canal completo para modal; quando fornecido com onChannelOpen, o card abre o modal ao clicar */
+  channel?: ChannelWithStats;
+  onChannelOpen?: (channel: ChannelWithStats) => void;
 }
 
 export function ChannelCard({
@@ -23,14 +27,14 @@ export function ChannelCard({
   videoCount,
   viewCount,
   description,
+  channel,
+  onChannelOpen,
 }: ChannelCardProps) {
   const initial = name.charAt(0).toUpperCase();
+  const isClickable = channel && onChannelOpen;
 
-  return (
-    <Link
-      href={`/channels/${channelId}`}
-      className='group flex flex-col gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 sm:flex-row sm:items-center sm:p-5 transition-all duration-200 hover:border-white/[0.1] hover:bg-white/[0.04]'
-    >
+  const content = (
+    <>
       {/* Avatar */}
       <div className='relative size-14 shrink-0'>
         <div className='size-14 overflow-hidden rounded-full border border-white/[0.08] bg-[#111118]'>
@@ -95,15 +99,50 @@ export function ChannelCard({
       </div>
 
       {/* CTA */}
-      <div className='flex shrink-0 items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 transition-all duration-200 group-hover:border-[rgba(232,68,28,0.3)] group-hover:bg-[rgba(232,68,28,0.08)]'>
-        <span
-          className='text-[10px] font-medium text-[#4A4845] transition-colors duration-200 group-hover:text-[#FF6B3D]'
-          style={{ fontFamily: "'DM Mono', monospace" }}
+      {isClickable ? (
+        <Link
+          href={`/channels/${channelId}`}
+          onClick={(e) => e.stopPropagation()}
+          className='flex shrink-0 items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 transition-all duration-200 group-hover:border-[rgba(232,68,28,0.3)] group-hover:bg-[rgba(232,68,28,0.08)]'
         >
-          Ver detalhes
-        </span>
-        <ArrowUpRight className='size-3 text-[#4A4845] transition-colors duration-200 group-hover:text-[#FF6B3D]' />
-      </div>
-    </Link>
+          <span
+            className='text-[10px] font-medium text-[#4A4845] transition-colors duration-200 group-hover:text-[#FF6B3D]'
+            style={{ fontFamily: "'DM Mono', monospace" }}
+          >
+            Ver detalhes
+          </span>
+          <ArrowUpRight className='size-3 text-[#4A4845] transition-colors duration-200 group-hover:text-[#FF6B3D]' />
+        </Link>
+      ) : (
+        <div className='flex shrink-0 items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 transition-all duration-200 group-hover:border-[rgba(232,68,28,0.3)] group-hover:bg-[rgba(232,68,28,0.08)]'>
+          <span
+            className='text-[10px] font-medium text-[#4A4845] transition-colors duration-200 group-hover:text-[#FF6B3D]'
+            style={{ fontFamily: "'DM Mono', monospace" }}
+          >
+            Ver detalhes
+          </span>
+          <ArrowUpRight className='size-3 text-[#4A4845] transition-colors duration-200 group-hover:text-[#FF6B3D]' />
+        </div>
+      )}
+    </>
   );
+
+  const className =
+    'group flex flex-col gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 sm:flex-row sm:items-center sm:p-5 transition-all duration-200 hover:border-white/[0.1] hover:bg-white/[0.04]';
+
+  if (isClickable) {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => onChannelOpen(channel)}
+        onKeyDown={(e) => e.key === 'Enter' && onChannelOpen(channel)}
+        className={className + ' cursor-pointer'}
+      >
+        {content}
+      </div>
+    );
+  }
+
+  return <Link href={`/channels/${channelId}`} className={className}>{content}</Link>;
 }

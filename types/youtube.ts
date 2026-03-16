@@ -68,6 +68,17 @@ export interface YouTubeChannelsResponse {
   items: YouTubeChannelItem[];
 }
 
+export interface ChannelWithStats {
+  channelId: string;
+  name: string;
+  description: string;
+  thumbnail: string;
+  subscriberCount: number;
+  videoCount: number;
+  viewCount: number;
+  publishedAt?: string;
+}
+
 export interface VideoWithStats {
   id: string;
   videoId: string;

@@ -1,6 +1,10 @@
 import { calcViralScore } from "./viral-score";
-import type { YouTubeSearchItem, YouTubeVideoItem } from "@/types/youtube";
-import type { VideoWithStats } from "@/types/youtube";
+import type {
+  YouTubeSearchItem,
+  YouTubeVideoItem,
+  YouTubeChannelItem,
+} from "@/types/youtube";
+import type { VideoWithStats, ChannelWithStats } from "@/types/youtube";
 
 export function transformToVideoWithStats(
   searchItem: YouTubeSearchItem,
@@ -51,5 +55,44 @@ export function mergeSearchWithVideos(
     .filter((s) => s.id?.videoId)
     .map((s) =>
       transformToVideoWithStats(s, videoMap.get(s.id!.videoId!))
+    );
+}
+
+/** Converte item de search (channel) + item de channels em ChannelWithStats */
+export function transformToChannelWithStats(
+  searchItem: YouTubeSearchItem,
+  channelItem?: YouTubeChannelItem
+): ChannelWithStats {
+  const channelId =
+    searchItem.id?.channelId || channelItem?.id || "";
+  const snippet = channelItem?.snippet || searchItem.snippet;
+  const stats = channelItem?.statistics;
+
+  return {
+    channelId,
+    name: snippet?.title || "",
+    description: snippet?.description || "",
+    thumbnail:
+      snippet?.thumbnails?.medium?.url ||
+      snippet?.thumbnails?.high?.url ||
+      snippet?.thumbnails?.default?.url ||
+      "",
+    subscriberCount: parseInt(stats?.subscriberCount || "0", 10),
+    videoCount: parseInt(stats?.videoCount || "0", 10),
+    viewCount: parseInt(stats?.viewCount || "0", 10),
+    publishedAt: snippet?.publishedAt,
+  };
+}
+
+/** Junta resultados do search (type=channel) com detalhes da API channels */
+export function mergeSearchWithChannels(
+  searchItems: YouTubeSearchItem[],
+  channelItems: YouTubeChannelItem[]
+): ChannelWithStats[] {
+  const channelMap = new Map(channelItems.map((c) => [c.id, c]));
+  return searchItems
+    .filter((s) => s.id?.channelId)
+    .map((s) =>
+      transformToChannelWithStats(s, channelMap.get(s.id!.channelId!))
     );
 }

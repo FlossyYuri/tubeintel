@@ -36,7 +36,7 @@ const navSections = [
   {
     title: 'Canais',
     items: [
-      { href: '/channels', label: 'Analisar Canal', icon: Tv },
+      { href: '/channels', label: 'Pesquisar Canais', icon: Tv },
       { href: '/compare', label: 'Comparar Canais', icon: ArrowLeftRight },
       { href: '/rising', label: 'Canais em Ascensão', icon: TrendingUp },
     ],

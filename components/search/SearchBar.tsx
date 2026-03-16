@@ -9,14 +9,17 @@ interface SearchBarProps {
   onSearch: (query: string) => void;
   loading?: boolean;
   placeholder?: string;
+  /** Valor inicial (ex: de ?q= na URL) */
+  defaultValue?: string;
 }
 
 export function SearchBar({
   onSearch,
   loading = false,
   placeholder = 'Ex: receitas rápidas, tutorial python, motivação...',
+  defaultValue = '',
 }: SearchBarProps) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(defaultValue);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

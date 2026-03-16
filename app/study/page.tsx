@@ -135,7 +135,7 @@ export default function StudyPage() {
 
           const items = (data.items || []).map(transformVideo);
           const filtered = items.filter(
-            (v) => getDurationSeconds(v.duration || "") > 240,
+            (v: VideoWithStats) => getDurationSeconds(v.duration || "") > 240,
           );
 
           if (append) {
