@@ -28,7 +28,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3005
+ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 RUN addgroup --system --gid 1001 nodejs
@@ -49,7 +49,7 @@ RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
 
 USER nextjs
 
-EXPOSE 3005
+EXPOSE 3000
 
 ENV DATABASE_URL="file:/app/data/prisma.db"
 
