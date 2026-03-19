@@ -1,7 +1,7 @@
 # ============================================
 # Stage 1: Dependencies
 # ============================================
-FROM node:22.22.0-alpine AS deps
+FROM node:22.22.0-slim AS deps
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
@@ -10,7 +10,7 @@ RUN npm ci
 # ============================================
 # Stage 2: Builder
 # ============================================
-FROM node:22.22.0-alpine AS builder
+FROM node:22.22.0-slim AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -23,7 +23,7 @@ RUN npm run build
 # ============================================
 # Stage 3: Runner
 # ============================================
-FROM node:22.22.0-alpine AS runner
+FROM node:22.22.0-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
