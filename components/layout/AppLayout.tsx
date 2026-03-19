@@ -33,7 +33,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className='flex min-h-screen bg-[#07070c]'>
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-        <main className='flex min-w-0 flex-1 flex-col md:ml-64 min-h-screen'>
+      <main className='flex min-w-0 flex-1 flex-col md:ml-64 min-h-screen'>
         <Topbar
           title={title}
           onToggleSidebar={() => setSidebarOpen((o) => !o)}

@@ -300,16 +300,13 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, handleClose]);
-  const desktopClasses =
-    'w-64 min-h-screen flex flex-col overflow-hidden bg-[#0a0a0f] border-r border-white/[0.06] fixed top-0 left-0 z-[100]';
-
   const mobileClasses =
     'absolute left-0 top-0 flex h-full w-72 max-w-[90vw] flex-col bg-[#0a0a0f] border-r border-white/[0.06] shadow-[4px_0_32px_rgba(0,0,0,0.6)]';
 
   return (
     <>
       {/* Desktop: visível a partir de md (768px) */}
-      <aside className={cn('hidden md:flex', desktopClasses)}>
+      <aside className='w-64 min-h-screen hidden md:flex flex-col overflow-hidden bg-[#0a0a0f] border-r border-white/[0.06] fixed top-0 left-0 z-[100]'>
         <SidebarContent />
       </aside>
 
