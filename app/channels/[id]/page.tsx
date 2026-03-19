@@ -2,11 +2,12 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, Bell } from "lucide-react";
 import { ChannelStats } from "@/components/channel/ChannelStats";
 import { ChannelGrowthChart } from "@/components/channel/ChannelGrowthChart";
 import { ChannelPerformanceBreakdown } from "@/components/channel/ChannelPerformanceBreakdown";
 import { RevenueEstimator } from "@/components/channel/RevenueEstimator";
+import { SimilarChannels } from "@/components/channel/SimilarChannels";
 import { RisingBadge } from "@/components/channel/RisingBadge";
 import { VideoGrid } from "@/components/video/VideoGrid";
 import { VideoModal } from "@/components/video/VideoModal";
@@ -39,11 +40,40 @@ export default function ChannelDetailPage() {
   const [error, setError] = useState("");
   const [selectedVideo, setSelectedVideo] = useState<VideoWithStats | null>(null);
   const [videoSort, setVideoSort] = useState<VideoSortKey>("recent");
+  const [alertStatus, setAlertStatus] = useState<"idle" | "loading" | "done" | "exists">("idle");
   const [analytics, setAnalytics] = useState<{
     shorts: { views: number; durationSeconds: number; likes: number; comments: number; videoCount: number };
     longForm: { views: number; durationSeconds: number; likes: number; comments: number; videoCount: number };
     periodDays: number;
   } | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    fetch("/api/alerts")
+      .then((r) => r.json())
+      .then((alerts: Array<{ type: string; value: string }>) => {
+        const exists = Array.isArray(alerts) && alerts.some(
+          (a) => a.type === "channel" && a.value === id
+        );
+        setAlertStatus(exists ? "exists" : "idle");
+      })
+      .catch(() => setAlertStatus("idle"));
+  }, [id]);
+
+  const handleCreateAlert = async () => {
+    if (!id || alertStatus !== "idle") return;
+    setAlertStatus("loading");
+    try {
+      await fetch("/api/alerts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "channel", value: id }),
+      });
+      setAlertStatus("done");
+    } catch {
+      setAlertStatus("idle");
+    }
+  };
 
   const apiOrder =
     videoSort === "views"
@@ -222,15 +252,32 @@ export default function ChannelDetailPage() {
             {channel.name}
             <RisingBadge score={risingScore} />
           </h2>
-          <a
-            href={`https://www.youtube.com/channel/${id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 mt-2 text-sm text-[var(--blue2)] hover:text-[var(--blue)] transition-colors"
-          >
-            <ExternalLink className="size-4" />
-            Abrir no YouTube
-          </a>
+          <div className="flex flex-wrap items-center gap-3 mt-2">
+            <a
+              href={`https://www.youtube.com/channel/${id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm text-[var(--blue2)] hover:text-[var(--blue)] transition-colors"
+            >
+              <ExternalLink className="size-4" />
+              Abrir no YouTube
+            </a>
+            <button
+              onClick={handleCreateAlert}
+              disabled={alertStatus === "loading" || alertStatus === "done" || alertStatus === "exists"}
+              className={`inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border transition-colors ${
+                alertStatus === "exists" || alertStatus === "done"
+                  ? "border-[var(--green)]/50 text-[var(--green)] cursor-default"
+                  : "border-[var(--border)] text-[var(--text2)] hover:border-[var(--accent)]/50 hover:text-[var(--accent)]"
+              }`}
+            >
+              <Bell className="size-4" />
+              {alertStatus === "loading" && "A adicionar..."}
+              {alertStatus === "done" && "Adicionado aos alertas"}
+              {alertStatus === "exists" && "Já em alertas"}
+              {alertStatus === "idle" && "Criar alerta"}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -305,6 +352,8 @@ export default function ChannelDetailPage() {
         </div>
       </div>
       <VideoGrid videos={sortedVideos} onVideoOpen={setSelectedVideo} />
+
+      <SimilarChannels channelId={id} channelName={channel?.name} />
 
       {nextPageToken && (
         <div className="mt-6 text-center">

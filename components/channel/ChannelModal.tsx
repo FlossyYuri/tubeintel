@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { X, ExternalLink, Users, Video, Eye } from "lucide-react";
+import { X, ExternalLink, Users, Video, Eye, Bell } from "lucide-react";
 import { formatNumber, formatDate } from "@/lib/format";
 import { buttonPrimary } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 import type { ChannelWithStats } from "@/types/youtube";
 
 interface ChannelModalProps {
@@ -19,6 +20,8 @@ function getViewsPerSub(ch: ChannelWithStats): number {
 }
 
 export function ChannelModal({ channel, onClose }: ChannelModalProps) {
+  const [alertStatus, setAlertStatus] = useState<"idle" | "loading" | "done" | "exists">("idle");
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -26,6 +29,34 @@ export function ChannelModal({ channel, onClose }: ChannelModalProps) {
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
   }, [onClose]);
+
+  useEffect(() => {
+    if (!channel) return;
+    fetch("/api/alerts")
+      .then((r) => r.json())
+      .then((alerts: Array<{ type: string; value: string }>) => {
+        const exists = Array.isArray(alerts) && alerts.some(
+          (a) => a.type === "channel" && a.value === channel.channelId
+        );
+        setAlertStatus(exists ? "exists" : "idle");
+      })
+      .catch(() => setAlertStatus("idle"));
+  }, [channel?.channelId]);
+
+  const handleCreateAlert = async () => {
+    if (!channel || alertStatus !== "idle") return;
+    setAlertStatus("loading");
+    try {
+      await fetch("/api/alerts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "channel", value: channel.channelId }),
+      });
+      setAlertStatus("done");
+    } catch {
+      setAlertStatus("idle");
+    }
+  };
 
   if (!channel) return null;
 
@@ -208,7 +239,7 @@ export function ChannelModal({ channel, onClose }: ChannelModalProps) {
         )}
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-2.5">
+        <div className="flex flex-col sm:flex-row gap-2.5 flex-wrap">
           <a
             href={`https://www.youtube.com/channel/${channel.channelId}`}
             target="_blank"
@@ -224,6 +255,22 @@ export function ChannelModal({ channel, onClose }: ChannelModalProps) {
           >
             Ver detalhes completos
           </Link>
+          <button
+            onClick={handleCreateAlert}
+            disabled={alertStatus === "loading" || alertStatus === "done" || alertStatus === "exists"}
+            className={cn(
+              "inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl border transition-colors",
+              alertStatus === "exists" || alertStatus === "done"
+                ? "border-[var(--green)]/50 bg-[var(--green)]/10 text-[var(--green)] cursor-default"
+                : "border-white/[0.08] bg-white/[0.02] text-[#F0EEE8] hover:bg-white/[0.04] hover:border-[var(--accent)]/50"
+            )}
+          >
+            <Bell className="size-4" />
+            {alertStatus === "loading" && "A adicionar..."}
+            {alertStatus === "done" && "Adicionado aos alertas"}
+            {alertStatus === "exists" && "Já em alertas"}
+            {alertStatus === "idle" && "Criar alerta"}
+          </button>
         </div>
       </div>
     </div>

@@ -130,18 +130,76 @@ export default function AlertsPage() {
           {alerts.map((a) => (
             <div
               key={a.id}
-              className={cn(card, "flex items-center justify-between p-4")}
+              className={cn(card, "flex items-center justify-between p-4 gap-3")}
             >
-              <div className="flex items-center gap-3">
-                <Bell className="size-5 text-[var(--accent)]" />
-                <div>
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <Bell className="size-5 text-[var(--accent)] shrink-0" />
+                <div className="min-w-0">
                   <div className="font-semibold capitalize">{a.type}</div>
-                  <div className="text-sm text-[var(--text3)]">{a.value}</div>
+                  <div className="text-sm text-[var(--text3)] truncate">{a.value}</div>
                 </div>
               </div>
-              <span className="text-[10px] font-mono px-2 py-1 rounded bg-[var(--green)]/20 text-[var(--green)]">
-                Activo
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <span
+                  className={cn(
+                    "text-[10px] font-mono px-2 py-1 rounded",
+                    a.active ? "bg-[var(--green)]/20 text-[var(--green)]" : "bg-[var(--text3)]/20 text-[var(--text3)]"
+                  )}
+                >
+                  {a.active ? "Activo" : "Inactivo"}
+                </span>
+                {a.active ? (
+                  <button
+                    onClick={async () => {
+                      try {
+                        await fetch(`/api/alerts/${a.id}`, {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ active: false }),
+                        });
+                        fetchAlerts();
+                      } catch {
+                        // ignore
+                      }
+                    }}
+                    className="text-[10px] font-mono px-2 py-1 rounded border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
+                  >
+                    Desativar
+                  </button>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      try {
+                        await fetch(`/api/alerts/${a.id}`, {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ active: true }),
+                        });
+                        fetchAlerts();
+                      } catch {
+                        // ignore
+                      }
+                    }}
+                    className="text-[10px] font-mono px-2 py-1 rounded border border-[var(--border)] hover:border-[var(--green)] hover:text-[var(--green)] transition-colors"
+                  >
+                    Ativar
+                  </button>
+                )}
+                <button
+                  onClick={async () => {
+                    if (!confirm("Remover este alerta?")) return;
+                    try {
+                      await fetch(`/api/alerts/${a.id}`, { method: "DELETE" });
+                      fetchAlerts();
+                    } catch {
+                      // ignore
+                    }
+                  }}
+                  className="text-[10px] font-mono px-2 py-1 rounded border border-[var(--accent)]/50 text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-colors"
+                >
+                  Remover
+                </button>
+              </div>
             </div>
           ))}
         </div>

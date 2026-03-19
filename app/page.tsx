@@ -60,7 +60,7 @@ export default function HomePage() {
       fetch('/api/collections')
         .then((r) => r.json())
         .then((d) => (Array.isArray(d) ? d.length : 0)),
-      fetch('/api/alerts')
+      fetch('/api/alerts?activeOnly=true')
         .then((r) => r.json())
         .then((d) => (Array.isArray(d) ? d.length : 0)),
     ]).then(([collections, alerts]) => {

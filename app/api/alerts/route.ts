@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const activeOnly = searchParams.get("activeOnly");
     const alerts = await prisma.alert.findMany({
-      where: { active: true },
+      where: activeOnly === "true" ? { active: true } : undefined,
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(alerts);

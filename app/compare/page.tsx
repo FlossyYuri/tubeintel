@@ -12,7 +12,7 @@ import {
   Legend,
   Tooltip,
 } from "recharts";
-import { ExternalLink, Plus, X } from "lucide-react";
+import { ExternalLink, Plus, X, Bell } from "lucide-react";
 import { formatNumber } from "@/lib/format";
 import { PageHeader, Spinner, ErrorMessage } from "@/components/ui";
 import { buttonPrimary } from "@/lib/design-tokens";
@@ -44,6 +44,8 @@ export default function ComparePage() {
   const [result, setResult] = useState<ChannelData[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [alertingId, setAlertingId] = useState<string | null>(null);
+  const [alertDoneIds, setAlertDoneIds] = useState<Set<string>>(new Set());
 
   const selectedCount = channels.filter(Boolean).length;
 
@@ -122,6 +124,21 @@ export default function ComparePage() {
       setError(err instanceof Error ? err.message : "Erro ao comparar");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateAlert = async (channelId: string) => {
+    if (alertDoneIds.has(channelId)) return;
+    setAlertingId(channelId);
+    try {
+      await fetch("/api/alerts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "channel", value: channelId }),
+      });
+      setAlertDoneIds((prev) => new Set(prev).add(channelId));
+    } finally {
+      setAlertingId(null);
     }
   };
 
@@ -288,6 +305,14 @@ export default function ComparePage() {
                   >
                     <ExternalLink className="size-4" />
                   </Link>
+                  <button
+                    onClick={() => handleCreateAlert(r.channelId)}
+                    disabled={alertingId === r.channelId || alertDoneIds.has(r.channelId)}
+                    className="p-1.5 rounded border border-[var(--border)] text-[var(--text3)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors disabled:opacity-50"
+                    title="Criar alerta"
+                  >
+                    <Bell className="size-4" />
+                  </button>
                 </div>
               ))}
             </div>

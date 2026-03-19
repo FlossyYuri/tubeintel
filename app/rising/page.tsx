@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ChannelCard } from "@/components/channel/ChannelCard";
+import { Bell } from "lucide-react";
 import { RisingBadge } from "@/components/channel/RisingBadge";
 import { PageHeader, Spinner, EmptyState, ErrorMessage, FilterSelect } from "@/components/ui";
 import { input, buttonPrimary } from "@/lib/design-tokens";
@@ -27,6 +27,8 @@ export default function RisingPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [alertingId, setAlertingId] = useState<string | null>(null);
+  const [alertDoneIds, setAlertDoneIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     setLoading(true);
@@ -45,6 +47,23 @@ export default function RisingPage() {
       })
       .finally(() => setLoading(false));
   }, [searchKeyword, region]);
+
+  const handleCreateAlert = async (e: React.MouseEvent, channelId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (alertDoneIds.has(channelId)) return;
+    setAlertingId(channelId);
+    try {
+      await fetch("/api/alerts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "channel", value: channelId }),
+      });
+      setAlertDoneIds((prev) => new Set(prev).add(channelId));
+    } finally {
+      setAlertingId(null);
+    }
+  };
 
   const loadMore = async () => {
     if (!nextPageToken || loadingMore) return;
@@ -123,7 +142,7 @@ export default function RisingPage() {
                 <div className="size-14 rounded-full bg-[var(--bg3)] overflow-hidden shrink-0">
                   {ch.thumbnail && <img src={ch.thumbnail} alt="" className="w-full h-full object-cover" />}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="font-bold flex items-center gap-2">
                     {ch.name}
                     <RisingBadge score={ch.risingScore} />
@@ -132,9 +151,19 @@ export default function RisingPage() {
                     {ch.ageMonths} meses · {ch.viewsPerVideo.toLocaleString()} views/vídeo
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="font-bold text-sm">{ch.subscriberCount.toLocaleString()} subs</div>
-                  <div className="text-[10px] text-[var(--text3)]">Rising {ch.risingScore}</div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <button
+                    onClick={(e) => handleCreateAlert(e, ch.channelId)}
+                    disabled={alertingId === ch.channelId || alertDoneIds.has(ch.channelId)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border)] text-[var(--text2)] hover:border-[var(--accent)]/50 hover:text-[var(--accent)] transition-colors disabled:opacity-50 text-xs"
+                  >
+                    <Bell className="size-3.5" />
+                    {alertingId === ch.channelId ? "A adicionar..." : alertDoneIds.has(ch.channelId) ? "Adicionado" : "Criar alerta"}
+                  </button>
+                  <div className="text-right">
+                    <div className="font-bold text-sm">{ch.subscriberCount.toLocaleString()} subs</div>
+                    <div className="text-[10px] text-[var(--text3)]">Rising {ch.risingScore}</div>
+                  </div>
                 </div>
               </div>
             </Link>

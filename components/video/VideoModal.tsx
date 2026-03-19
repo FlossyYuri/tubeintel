@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { X, Bookmark, ExternalLink } from "lucide-react";
 import { formatNumber, formatDate, formatAbsoluteDate, parseDuration } from "@/lib/format";
@@ -8,19 +8,33 @@ import { calcEngagementRate, calcViewsPerHour } from "@/lib/viral-score";
 import { getCategoryName } from "@/lib/categories";
 import { buttonPrimary, buttonSecondary } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
+import { SaveToCollectionModal } from "./SaveToCollectionModal";
 import type { VideoWithStats } from "@/types/youtube";
 
 interface VideoModalProps {
   video: VideoWithStats | null;
   onClose: () => void;
+  /** Quando true, mostra botão "Guardar em colecção" e abre SaveToCollectionModal ao clicar */
+  showSaveButton?: boolean;
+  /** @deprecated Use showSaveButton. Callback alternativo se o parent quiser controlar o fluxo. */
   onSaveToCollection?: (video: VideoWithStats) => void;
+  /** Quando na página de colecção: permite remover o vídeo da colecção */
+  removeFromCollection?: {
+    collectionId: string;
+    itemId: string;
+    onRemoved: () => void;
+  };
 }
 
 export function VideoModal({
   video,
   onClose,
+  showSaveButton = true,
   onSaveToCollection,
+  removeFromCollection,
 }: VideoModalProps) {
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [removing, setRemoving] = useState(false);
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -165,7 +179,7 @@ export function VideoModal({
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-2.5">
+        <div className="flex flex-col sm:flex-row gap-2.5 flex-wrap">
           <a
             href={`https://www.youtube.com/watch?v=${video.videoId}`}
             target="_blank"
@@ -174,19 +188,55 @@ export function VideoModal({
           >
             ▶ Abrir no YouTube
           </a>
-          {onSaveToCollection && (
+          {removeFromCollection ? (
             <button
-              onClick={() => onSaveToCollection(video)}
+              onClick={async () => {
+                setRemoving(true);
+                try {
+                  const res = await fetch(
+                    `/api/collections/${removeFromCollection.collectionId}/items/${removeFromCollection.itemId}`,
+                    { method: "DELETE" }
+                  );
+                  if (res.ok) {
+                    removeFromCollection.onRemoved();
+                    onClose();
+                  }
+                } finally {
+                  setRemoving(false);
+                }
+              }}
+              disabled={removing}
               className={cn(
-                buttonSecondary,
-                "inline-flex items-center justify-center gap-2"
+                "inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl border border-[var(--accent)]/50 bg-[var(--accent)]/10 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-colors disabled:opacity-50"
               )}
             >
-              <Bookmark className="size-4" /> Guardar em colecção
+              {removing ? "A remover..." : "Remover da colecção"}
             </button>
+          ) : (
+            (showSaveButton || onSaveToCollection) && (
+              <button
+                onClick={() =>
+                  onSaveToCollection ? onSaveToCollection(video) : setShowSaveModal(true)
+                }
+                className={cn(
+                  buttonSecondary,
+                  "inline-flex items-center justify-center gap-2"
+                )}
+              >
+                <Bookmark className="size-4" /> Guardar em colecção
+              </button>
+            )
           )}
         </div>
       </div>
+
+      {showSaveModal && video && (
+        <SaveToCollectionModal
+          video={video}
+          onClose={() => setShowSaveModal(false)}
+          onSaved={() => setShowSaveModal(false)}
+        />
+      )}
     </div>
   );
 }

@@ -39,7 +39,9 @@ export default function CollectionDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const rawVideos: VideoWithStats[] = (collection?.items || []).map((v) => ({
+  const rawVideos: (VideoWithStats & { savedVideoId?: string })[] = (
+    collection?.items || []
+  ).map((v) => ({
     id: v.videoId,
     videoId: v.videoId,
     title: v.title,
@@ -51,6 +53,7 @@ export default function CollectionDetailPage() {
     likeCount: 0,
     commentCount: 0,
     viralScore: v.viralScore,
+    savedVideoId: v.id,
   }));
 
   const videos = useMemo(
@@ -58,7 +61,19 @@ export default function CollectionDetailPage() {
     [rawVideos, sortBy]
   );
 
-  const [selectedVideo, setSelectedVideo] = useState<VideoWithStats | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<
+    (VideoWithStats & { savedVideoId?: string }) | null
+  >(null);
+
+  const fetchCollection = () => {
+    fetch(`/api/collections/${id}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.error) throw new Error(data.error);
+        setCollection({ name: data.name, items: data.items || [] });
+      })
+      .catch(() => setCollection(null));
+  };
 
   if (loading) {
     return (
@@ -106,7 +121,23 @@ export default function CollectionDetailPage() {
         <VideoGrid videos={videos} onVideoOpen={setSelectedVideo} />
       )}
       {selectedVideo && (
-        <VideoModal video={selectedVideo} onClose={() => setSelectedVideo(null)} />
+        <VideoModal
+          video={selectedVideo}
+          onClose={() => setSelectedVideo(null)}
+          showSaveButton={false}
+          removeFromCollection={
+            selectedVideo.savedVideoId
+              ? {
+                  collectionId: id,
+                  itemId: selectedVideo.savedVideoId,
+                  onRemoved: () => {
+                    fetchCollection();
+                    setSelectedVideo(null);
+                  },
+                }
+              : undefined
+          }
+        />
       )}
     </div>
   );
