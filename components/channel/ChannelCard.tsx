@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { formatNumber } from '@/lib/format';
 import { ArrowUpRight } from 'lucide-react';
@@ -39,11 +38,9 @@ export function ChannelCard({
       <div className='relative size-14 shrink-0'>
         <div className='size-14 overflow-hidden rounded-full border border-white/[0.08] bg-[#111118]'>
           {thumbnail ? (
-            <Image
+            <img
               src={thumbnail}
               alt=''
-              width={56}
-              height={56}
               className='h-full w-full object-cover'
             />
           ) : (

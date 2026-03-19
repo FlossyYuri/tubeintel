@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { ViralScore } from "./ViralScore";
 import { formatNumber, formatDate, formatAbsoluteDate, parseDuration, isShort } from "@/lib/format";
 import {
@@ -46,12 +45,10 @@ export function VideoCard({ video, listView = false, onOpen, outperformanceRatio
         )}
       >
         {video.thumbnail && (
-          <Image
+          <img
             src={video.thumbnail}
             alt=""
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes={listView ? "(max-width: 640px) 100vw, 180px" : "(max-width: 400px) 100vw, 280px"}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         )}
         {score >= 75 && (

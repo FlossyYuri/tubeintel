@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { ExternalLink, Eye, Video } from "lucide-react";
 import { formatNumber, parseDuration, isShort } from "@/lib/format";
 import { estimateRevenue, DEFAULT_REVENUE_PARAMS } from "@/lib/revenue";
@@ -141,11 +140,9 @@ export function ChannelMonitorCard({
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="size-14 rounded-full bg-[#111118] overflow-hidden shrink-0">
             {channel.thumbnail && (
-              <Image
+              <img
                 src={channel.thumbnail}
                 alt=""
-                width={56}
-                height={56}
                 className="w-full h-full object-cover"
               />
             )}
@@ -236,12 +233,10 @@ export function ChannelMonitorCard({
                   >
                     <div className="relative aspect-video bg-[#111118]">
                       {v.thumbnail && (
-                        <Image
+                        <img
                           src={v.thumbnail}
                           alt=""
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform"
-                          sizes="120px"
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform"
                         />
                       )}
                       <div className="absolute bottom-1 right-1 bg-black/85 text-white text-[9px] px-1 py-0.5 rounded font-mono">

@@ -6,7 +6,7 @@ services:
     container_name: tubeintel
     restart: unless-stopped
     ports:
-      - "3005:3000"
+      - "3005:3005"
     environment:
       - NODE_ENV=production
       - PORT=3005

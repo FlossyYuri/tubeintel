@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { formatNumber, parseDuration } from "@/lib/format";
 import { cardClasses } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
@@ -40,12 +39,10 @@ export function StudyVideoCard({
       >
         <div className="relative w-24 min-w-24 sm:w-[120px] sm:min-w-[120px] aspect-video bg-[var(--bg3)] overflow-hidden shrink-0">
           {video.thumbnail && (
-            <Image
+            <img
               src={video.thumbnail}
               alt=""
-              fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-              sizes="120px"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
           )}
           <div className="absolute bottom-1 right-1 bg-black/85 text-white text-[9px] px-1.5 py-0.5 rounded font-mono">
@@ -87,12 +84,10 @@ export function StudyVideoCard({
         )}
       >
         {video.thumbnail && (
-          <Image
+          <img
             src={video.thumbnail}
             alt=""
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes={isShorts ? "200px" : "280px"}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         )}
         <div className="absolute bottom-2 right-2 bg-black/85 text-white text-[10px] px-1.5 py-0.5 rounded font-mono">

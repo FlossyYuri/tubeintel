@@ -10,12 +10,15 @@ interface TopbarProps {
   sidebarOpen?: boolean;
 }
 
-export function Topbar({ title, onToggleSidebar, sidebarOpen = false }: TopbarProps) {
+export function Topbar({
+  title,
+  onToggleSidebar,
+  sidebarOpen = false,
+}: TopbarProps) {
   return (
     <div
       className={cn(
-        'sticky top-0 flex h-[60px] items-center justify-between gap-3 border-b border-white/[0.06] bg-[#0a0a0f]/80 px-4 sm:px-5 lg:px-7',
-        sidebarOpen ? 'z-[210]' : 'z-50',
+        'sticky top-0 flex h-[60px] items-center justify-between gap-3 border-b border-white/[0.06] bg-[#0a0a0f]/80 px-4 sm:px-5 lg:px-7 z-50',
       )}
       style={{
         backdropFilter: 'blur(12px)',
@@ -36,7 +39,11 @@ export function Topbar({ title, onToggleSidebar, sidebarOpen = false }: TopbarPr
             )}
             aria-label={sidebarOpen ? 'Fechar menu' : 'Abrir menu'}
           >
-            {sidebarOpen ? <X className='size-5' /> : <Menu className='size-4' />}
+            {sidebarOpen ? (
+              <X className='size-5' />
+            ) : (
+              <Menu className='size-4' />
+            )}
           </button>
         )}
 

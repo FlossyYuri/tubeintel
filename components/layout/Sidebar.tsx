@@ -275,12 +275,10 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
 
   // Fecha ao navegar (sem animação)
   useEffect(() => {
-    if (open && onClose) {
-      setIsClosing(false);
-      closingRef.current = false;
-      onClose();
+    if (open) {
+      handleClose(); // ← usa a animação de saída
     }
-  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pathname]); // handleClose não precisa estar nas deps pois é useCallback estável
 
   // Bloqueia scroll do body quando sidebar aberta no mobile
   useEffect(() => {
@@ -302,14 +300,16 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, handleClose]);
+  const desktopClasses =
+    'w-64 min-h-screen flex flex-col overflow-hidden bg-[#0a0a0f] border-r border-white/[0.06] fixed top-0 left-0 z-[100]';
 
-  const sidebarClasses =
-    'relative w-64 min-h-screen flex flex-col overflow-hidden bg-[#0a0a0f] border-r border-white/[0.06] fixed top-0 left-0 z-[100]';
+  const mobileClasses =
+    'absolute left-0 top-0 flex h-full w-72 max-w-[90vw] flex-col bg-[#0a0a0f] border-r border-white/[0.06] shadow-[4px_0_32px_rgba(0,0,0,0.6)]';
 
   return (
     <>
       {/* Desktop: visível a partir de md (768px) */}
-      <aside className={cn('hidden md:flex', sidebarClasses)}>
+      <aside className={cn('hidden md:flex', desktopClasses)}>
         <SidebarContent />
       </aside>
 
@@ -331,9 +331,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
           />
           <aside
             className={cn(
-              'absolute left-0 top-0 flex h-full w-72 max-w-[90vw] flex-col',
-              'bg-[#0a0a0f] border-r border-white/[0.06]',
-              'shadow-[4px_0_32px_rgba(0,0,0,0.6)]',
+              mobileClasses,
               isClosing ? 'animate-slide-out-left' : 'animate-slide-in-left',
             )}
           >
