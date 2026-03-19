@@ -13,6 +13,7 @@ import {
   Zap,
   Bookmark,
   Bell,
+  Eye,
   Settings,
   X,
   BarChart2,
@@ -53,6 +54,7 @@ const navSections = [
     items: [
       { href: '/saved', label: 'Colecções', icon: Bookmark },
       { href: '/alerts', label: 'Alertas', icon: Bell },
+      { href: '/monitor', label: 'Channel Spy', icon: Eye },
     ],
   },
 ];

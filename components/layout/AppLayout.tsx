@@ -19,6 +19,7 @@ function getPageTitle(pathname: string): string {
     '/shorts': 'Shorts Virais',
     '/saved': 'Colecções Guardadas',
     '/alerts': 'Alertas e Monitoring',
+    '/monitor': 'Channel Spy',
     '/settings': 'Configurações',
   };
   return titles[pathname] ?? 'TubeIntel';

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, Plus } from "lucide-react";
+import Link from "next/link";
+import { Bell, Plus, Eye } from "lucide-react";
 import { PageHeader, Spinner, EmptyState } from "@/components/ui";
 import { input, buttonPrimary, card } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
@@ -15,8 +16,14 @@ interface Alert {
   active: boolean;
 }
 
+interface ChannelMeta {
+  name: string;
+  thumbnail: string;
+}
+
 export default function AlertsPage() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [channelMeta, setChannelMeta] = useState<Record<string, ChannelMeta>>({});
   const [loading, setLoading] = useState(true);
   const [type, setType] = useState("keyword");
   const [value, setValue] = useState("");
@@ -33,6 +40,39 @@ export default function AlertsPage() {
   useEffect(() => {
     fetchAlerts();
   }, []);
+
+  useEffect(() => {
+    const channelIds = [
+      ...new Set(
+        alerts.filter((a) => a.type === "channel").map((a) => a.value)
+      ),
+    ];
+    if (channelIds.length === 0) return;
+    Promise.all(
+      channelIds.map((id) =>
+        fetch(`/api/youtube/channel?channelId=${encodeURIComponent(id)}`).then(
+          (r) => r.json()
+        )
+      )
+    ).then((datas) => {
+      const meta: Record<string, ChannelMeta> = {};
+      datas.forEach((data, i) => {
+        const ch =
+          data.channels?.items?.[0] ?? data.items?.[0];
+        const id = channelIds[i];
+        if (ch?.snippet && id) {
+          meta[id] = {
+            name: ch.snippet.title || "",
+            thumbnail:
+              ch.snippet.thumbnails?.medium?.url ||
+              ch.snippet.thumbnails?.high?.url ||
+              "",
+          };
+        }
+      });
+      setChannelMeta((prev) => ({ ...prev, ...meta }));
+    });
+  }, [alerts]);
 
   useEffect(() => {
     if (type !== "channel") setSelectedChannel(null);
@@ -127,19 +167,43 @@ export default function AlertsPage() {
         />
       ) : (
         <div className="space-y-2">
-          {alerts.map((a) => (
+          {alerts.map((a) => {
+            const meta = a.type === "channel" ? channelMeta[a.value] : null;
+            return (
             <div
               key={a.id}
               className={cn(card, "flex items-center justify-between p-4 gap-3")}
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <Bell className="size-5 text-[var(--accent)] shrink-0" />
+                {a.type === "channel" && meta?.thumbnail ? (
+                  <div className="size-10 rounded-full bg-[var(--bg3)] overflow-hidden shrink-0">
+                    <img
+                      src={meta.thumbnail}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <Bell className="size-5 text-[var(--accent)] shrink-0" />
+                )}
                 <div className="min-w-0">
                   <div className="font-semibold capitalize">{a.type}</div>
-                  <div className="text-sm text-[var(--text3)] truncate">{a.value}</div>
+                  <div className="text-sm text-[var(--text3)] truncate">
+                    {a.type === "channel" && meta?.name
+                      ? meta.name
+                      : a.value}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
+                {a.type === "channel" && (
+                  <Link
+                    href={`/monitor?channelId=${encodeURIComponent(a.value)}`}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-[var(--blue2)]/50 text-[var(--blue2)] hover:bg-[var(--blue2)]/10 transition-colors text-[10px] font-mono"
+                  >
+                    <Eye className="size-3" /> Espiar
+                  </Link>
+                )}
                 <span
                   className={cn(
                     "text-[10px] font-mono px-2 py-1 rounded",
@@ -201,7 +265,8 @@ export default function AlertsPage() {
                 </button>
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       )}
     </div>
