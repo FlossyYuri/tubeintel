@@ -5,30 +5,13 @@ import { SearchBar } from "@/components/search/SearchBar";
 import { VideoGrid } from "@/components/video/VideoGrid";
 import { VideoModal } from "@/components/video/VideoModal";
 import { SortControls } from "@/components/video/SortControls";
-import { PageHeader, Spinner, EmptyState, ErrorMessage } from "@/components/ui";
+import { PageHeader, Spinner, EmptyState, ErrorMessage, FilterSelect } from "@/components/ui";
 import { sectionTitle } from "@/lib/design-tokens";
-import { input } from "@/lib/design-tokens";
 import type { VideoSortKey } from "@/lib/sort-videos";
-import { cn } from "@/lib/utils";
+import { YOUTUBE_CATEGORY_OPTIONS } from "@/lib/categories";
+import { SELECT_REGIONS } from "@/lib/regions";
 import type { VideoWithStats } from "@/types/youtube";
 import type { VideoWithOutperformance } from "@/app/api/youtube/outperformers/route";
-
-const REGIONS = [
-  { value: "PT", label: "🇵🇹 PT" },
-  { value: "BR", label: "🇧🇷 BR" },
-  { value: "US", label: "🇺🇸 US" },
-  { value: "GB", label: "🇬🇧 UK" },
-];
-
-const CATEGORIES = [
-  { value: "", label: "Todas" },
-  { value: "10", label: "Música" },
-  { value: "20", label: "Gaming" },
-  { value: "23", label: "Comédia" },
-  { value: "24", label: "Entretenimento" },
-  { value: "25", label: "Notícias" },
-  { value: "28", label: "Tecnologia" },
-];
 
 const PERIODS = [
   { value: "week", label: "7 dias" },
@@ -55,7 +38,7 @@ const SORT_TO_API_ORDER: Record<VideoSortKey, string> = {
 export default function DiscoverPage() {
   const [keyword, setKeyword] = useState("viral");
   const [searchKeyword, setSearchKeyword] = useState("viral");
-  const [region, setRegion] = useState("PT");
+  const [region, setRegion] = useState("US");
   const [category, setCategory] = useState("");
   const [period, setPeriod] = useState("week");
   const [minMultiplier, setMinMultiplier] = useState("2");
@@ -141,44 +124,34 @@ export default function DiscoverPage() {
               placeholder="Nicho ou keyword (ex: viral, receitas...)"
             />
           </div>
-          <div className="flex flex-wrap gap-2.5 items-center">
-            <select
+          <div className="flex flex-wrap gap-2.5 items-end">
+            <FilterSelect
+              label="Região"
               value={region}
-              onChange={(e) => setRegion(e.target.value)}
-              className={cn(input, "cursor-pointer")}
-            >
-              {REGIONS.map((r) => (
-                <option key={r.value} value={r.value}>{r.label}</option>
-              ))}
-            </select>
-            <select
+              onChange={setRegion}
+              options={SELECT_REGIONS}
+            />
+            <FilterSelect
+              label="Categoria"
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className={cn(input, "cursor-pointer")}
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c.value || "all"} value={c.value}>{c.label}</option>
-              ))}
-            </select>
-            <select
+              onChange={setCategory}
+              options={YOUTUBE_CATEGORY_OPTIONS}
+            />
+            <FilterSelect
+              label="Período"
               value={period}
-              onChange={(e) => setPeriod(e.target.value)}
-              className={cn(input, "cursor-pointer")}
-            >
-              {PERIODS.map((p) => (
-                <option key={p.value} value={p.value}>{p.label}</option>
-              ))}
-            </select>
-            <span className="text-[var(--text3)] text-sm">Mín. </span>
-            <select
+              onChange={setPeriod}
+              options={PERIODS}
+            />
+            <FilterSelect
+              label="Mín. multiplicador"
               value={minMultiplier}
-              onChange={(e) => setMinMultiplier(e.target.value)}
-              className={cn(input, "cursor-pointer")}
-            >
-              {MULTIPLIERS.map((m) => (
-                <option key={m.value} value={m.value}>{m.label} média</option>
-              ))}
-            </select>
+              onChange={setMinMultiplier}
+              options={MULTIPLIERS.map((m) => ({
+                value: m.value,
+                label: `${m.label} média`,
+              }))}
+            />
           </div>
         </div>
       </div>

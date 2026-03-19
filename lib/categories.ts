@@ -16,6 +16,22 @@ export const CATEGORY_NAMES: Record<string, string> = {
   "28": "Ciência & Tecnologia",
 };
 
+/** Opções para selects de categoria (value/label) */
+export const YOUTUBE_CATEGORY_OPTIONS = [
+  { value: "", label: "Todas" },
+  ...Object.entries(CATEGORY_NAMES)
+    .filter(([k]) => k !== "0")
+    .map(([value, label]) => ({ value, label })),
+];
+
+/** Opções para botões de categoria (id/name) */
+export const YOUTUBE_CATEGORY_BUTTONS = [
+  { id: "0", name: "Todos" },
+  ...Object.entries(CATEGORY_NAMES)
+    .filter(([k]) => k !== "0")
+    .map(([id, name]) => ({ id, name })),
+];
+
 export function getCategoryName(categoryId?: string): string {
   if (!categoryId) return "";
   return CATEGORY_NAMES[categoryId] ?? categoryId;

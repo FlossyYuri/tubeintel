@@ -19,7 +19,7 @@ import type { ChannelWithStats } from '@/types/youtube';
 
 const defaultFilters: ChannelSearchFilters = {
   order: 'relevance',
-  regionCode: 'PT',
+  regionCode: 'US',
 };
 
 /* ─── Stat pill ─────────────────────────────────────────── */

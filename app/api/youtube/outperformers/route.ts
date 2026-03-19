@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const keyword = searchParams.get("keyword") || "viral";
-    const regionCode = searchParams.get("regionCode") || "PT";
+    const regionCode = searchParams.get("regionCode") || "US";
     const videoCategoryId = searchParams.get("videoCategoryId") || "";
     const publishedAfter = searchParams.get("publishedAfter") || "week";
     const minMultiplier = parseFloat(searchParams.get("minMultiplier") || "2");

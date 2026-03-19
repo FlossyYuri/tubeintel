@@ -3,22 +3,16 @@
 import { useState } from "react";
 import { VideoGrid } from "@/components/video/VideoGrid";
 import { VideoModal } from "@/components/video/VideoModal";
-import { PageHeader, Spinner, EmptyState, ErrorMessage } from "@/components/ui";
+import { PageHeader, Spinner, EmptyState, ErrorMessage, FilterSelect } from "@/components/ui";
 import { input, buttonPrimary } from "@/lib/design-tokens";
+import { SELECT_REGIONS } from "@/lib/regions";
 import { mergeSearchWithVideos } from "@/lib/transform";
 import { isShort } from "@/lib/format";
 import type { VideoWithStats } from "@/types/youtube";
 
-const REGIONS = [
-  { value: "PT", label: "🇵🇹 PT" },
-  { value: "BR", label: "🇧🇷 BR" },
-  { value: "US", label: "🇺🇸 US" },
-  { value: "GB", label: "🇬🇧 UK" },
-];
-
 export default function ShortsPage() {
   const [query, setQuery] = useState("");
-  const [region, setRegion] = useState("PT");
+  const [region, setRegion] = useState("US");
   const [videos, setVideos] = useState<VideoWithStats[]>([]);
   const [nextPageToken, setNextPageToken] = useState<string | undefined>();
   const [loadingMore, setLoadingMore] = useState(false);
@@ -77,24 +71,27 @@ export default function ShortsPage() {
       />
 
       <div className="bg-gradient-to-br from-[var(--card)] to-[var(--card2)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 mb-7">
-        <div className="flex flex-col sm:flex-row gap-2.5 flex-wrap">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            placeholder="Tema dos shorts que queres encontrar..."
-            className={input}
-          />
-          <select
+        <div className="flex flex-col sm:flex-row gap-2.5 flex-wrap items-end">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="shorts-query" className="text-[9px] uppercase tracking-[0.18em] text-[var(--text3)] font-mono">
+              Tema
+            </label>
+            <input
+              id="shorts-query"
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              placeholder="Tema dos shorts que queres encontrar..."
+              className={input}
+            />
+          </div>
+          <FilterSelect
+            label="Região"
             value={region}
-            onChange={(e) => setRegion(e.target.value)}
-            className={input}
-          >
-            {REGIONS.map((r) => (
-              <option key={r.value} value={r.value}>{r.label}</option>
-            ))}
-          </select>
+            onChange={setRegion}
+            options={SELECT_REGIONS}
+          />
           <button
             onClick={handleSearch}
             disabled={loading}

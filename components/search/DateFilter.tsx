@@ -17,7 +17,11 @@ interface DateFilterProps {
 
 export function DateFilter({ value, onChange }: DateFilterProps) {
   return (
-    <div className="flex gap-2 flex-wrap mt-3.5">
+    <div className="mt-3.5">
+      <p className="mb-2 text-[9px] uppercase tracking-[0.18em] text-[var(--text3)] font-mono">
+        Período
+      </p>
+      <div className="flex gap-2 flex-wrap">
       {DATE_OPTIONS.map((opt) => (
         <button
           key={opt.value || "any"}
@@ -33,6 +37,7 @@ export function DateFilter({ value, onChange }: DateFilterProps) {
           {opt.label}
         </button>
       ))}
+      </div>
     </div>
   );
 }

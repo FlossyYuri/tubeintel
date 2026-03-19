@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const q = searchParams.get("q") || "";
     const order = searchParams.get("order") || "relevance";
-    const regionCode = searchParams.get("regionCode") || "PT";
+    const regionCode = searchParams.get("regionCode") || "US";
     const publishedAfter = searchParams.get("publishedAfter") || "";
     const videoDuration = searchParams.get("videoDuration") || "";
     const videoCategoryId = searchParams.get("videoCategoryId") || "";

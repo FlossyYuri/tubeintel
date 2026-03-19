@@ -44,7 +44,7 @@ export default function NichesPage() {
       />
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <span className="text-sm font-medium text-[var(--text2)]">Filtrar:</span>
+        <span className="text-sm font-medium text-[var(--text2)]">Categoria:</span>
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}

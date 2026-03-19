@@ -21,7 +21,7 @@ import type { VideoWithStats } from '@/types/youtube';
 
 const defaultFilters: SearchFilters = {
   order: 'date',
-  regionCode: 'PT',
+  regionCode: 'US',
   videoDuration: '',
   videoFormat: '',
   videoCategoryId: '',

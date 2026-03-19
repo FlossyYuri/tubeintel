@@ -19,6 +19,16 @@ export function formatDate(iso: string): string {
   return Math.floor(diff / 31536000) + " anos atrás";
 }
 
+export function formatAbsoluteDate(iso: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const day = d.getDate();
+  const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+  const month = months[d.getMonth()];
+  const year = d.getFullYear();
+  return `${day} ${month} ${year}`;
+}
+
 export function parseDuration(iso: string): string {
   if (!iso) return "";
   const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
@@ -41,12 +51,25 @@ export function getDurationSeconds(iso: string): number {
   );
 }
 
+export function formatDurationSeconds(seconds: number): string {
+  if (!seconds || seconds < 0) return "0m";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
 export function isShort(duration: string, title = ""): boolean {
   if (!duration) return false;
   const total = getDurationSeconds(duration);
   return total <= 60 || title.toLowerCase().includes("#short");
 }
 
+/** Alias for isShort - used for revenue/analytics consistency */
+export function isShortForm(duration: string, title = ""): boolean {
+  return isShort(duration, title);
+}
+
 export function isLongForm(duration: string): boolean {
-  return getDurationSeconds(duration) > 240;
+  return getDurationSeconds(duration) > 180;
 }

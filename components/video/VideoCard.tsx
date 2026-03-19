@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { ViralScore } from "./ViralScore";
-import { formatNumber, formatDate, parseDuration, isShort } from "@/lib/format";
+import { formatNumber, formatDate, formatAbsoluteDate, parseDuration, isShort } from "@/lib/format";
 import {
   badge,
   badgeViral,
@@ -59,16 +59,15 @@ export function VideoCard({ video, listView = false, onOpen, outperformanceRatio
             viral
           </div>
         )}
-        {short ? (
+        {short && (
           <div className="absolute top-2 right-2 bg-[var(--purple)] text-white text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">
             Short
           </div>
-        ) : (
-          video.duration && (
-            <div className="absolute bottom-2 right-2 bg-black/85 text-white text-[10px] px-1.5 py-0.5 rounded font-mono">
-              {parseDuration(video.duration)}
-            </div>
-          )
+        )}
+        {video.duration && (
+          <div className="absolute bottom-2 right-2 bg-black/85 text-white text-[10px] px-1.5 py-0.5 rounded font-mono">
+            {parseDuration(video.duration)}
+          </div>
         )}
       </div>
       <div className={cn("p-3 sm:p-3.5", listView && "flex-1 min-w-0")}>
@@ -109,7 +108,10 @@ export function VideoCard({ video, listView = false, onOpen, outperformanceRatio
             </span>
           )}
           {pub && (
-            <span className="text-[var(--text3)]">🕐 {pub}</span>
+            <span className="text-[var(--text3)]" title={formatAbsoluteDate(video.publishedAt)}>
+              🕐 {pub}
+              <span className="ml-1 opacity-70">({formatAbsoluteDate(video.publishedAt)})</span>
+            </span>
           )}
         </div>
         <ViralScore score={score} />

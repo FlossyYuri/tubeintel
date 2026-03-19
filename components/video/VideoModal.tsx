@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { X, Bookmark, ExternalLink } from "lucide-react";
-import { formatNumber, formatDate, parseDuration } from "@/lib/format";
+import { formatNumber, formatDate, formatAbsoluteDate, parseDuration } from "@/lib/format";
 import { calcEngagementRate, calcViewsPerHour } from "@/lib/viral-score";
 import { getCategoryName } from "@/lib/categories";
 import { buttonPrimary, buttonSecondary } from "@/lib/design-tokens";
@@ -96,6 +96,9 @@ export function VideoModal({
           </span>
           <span className="text-[var(--text3)]">
             🕐 {formatDate(video.publishedAt)}
+            <span className="ml-1.5 text-[var(--text2)]">
+              · {formatAbsoluteDate(video.publishedAt)}
+            </span>
           </span>
           {video.duration && (
             <span className="text-[var(--text3)]">

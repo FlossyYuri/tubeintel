@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const keyword = searchParams.get("keyword") || "viral";
-    const regionCode = searchParams.get("regionCode") || "PT";
+    const regionCode = searchParams.get("regionCode") || "US";
     const maxAgeMonths = parseInt(searchParams.get("maxAgeMonths") || "18", 10);
     const maxVideos = parseInt(searchParams.get("maxVideos") || "30", 10);
     const pageToken = searchParams.get("pageToken") || "";

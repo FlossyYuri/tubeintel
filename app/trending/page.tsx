@@ -7,31 +7,13 @@ import { SortControls } from "@/components/video/SortControls";
 import { Spinner, EmptyState, ErrorMessage } from "@/components/ui";
 import { PageHeader } from "@/components/ui";
 import { sectionTitle } from "@/lib/design-tokens";
+import { YOUTUBE_CATEGORY_BUTTONS } from "@/lib/categories";
+import { TRENDING_REGIONS } from "@/lib/regions";
 import { calcViralScore } from "@/lib/viral-score";
 import { parseDuration, isShort, getDurationSeconds } from "@/lib/format";
 import { sortVideos, type VideoSortKey } from "@/lib/sort-videos";
 import type { VideoWithStats } from "@/types/youtube";
 import type { YouTubeVideoItem } from "@/types/youtube";
-
-// PT, BR, US, GB são suportados pelo chart mostPopular da YouTube API
-// AO e MZ não são suportados para trending
-const COUNTRIES = [
-  { code: "PT", flag: "🇵🇹", name: "Portugal" },
-  { code: "BR", flag: "🇧🇷", name: "Brasil" },
-  { code: "US", flag: "🇺🇸", name: "USA" },
-  { code: "GB", flag: "🇬🇧", name: "UK" },
-];
-
-const CATEGORIES = [
-  { id: "0", name: "Todos" },
-  { id: "10", name: "Música" },
-  { id: "20", name: "Gaming" },
-  { id: "22", name: "People" },
-  { id: "23", name: "Comédia" },
-  { id: "24", name: "Entretenimento" },
-  { id: "25", name: "Notícias" },
-  { id: "28", name: "Tecnologia" },
-];
 
 function transformVideo(v: YouTubeVideoItem): VideoWithStats {
   const stats = v.statistics;
@@ -65,7 +47,7 @@ function transformVideo(v: YouTubeVideoItem): VideoWithStats {
 }
 
 export default function TrendingPage() {
-  const [country, setCountry] = useState("PT");
+  const [country, setCountry] = useState("US");
   const [category, setCategory] = useState("0");
   const [videos, setVideos] = useState<VideoWithStats[]>([]);
   const [nextPageToken, setNextPageToken] = useState<string | undefined>();
@@ -135,27 +117,33 @@ export default function TrendingPage() {
         description="Vídeos em alta por país — actualizado em tempo real"
       />
 
+      <p className="mb-2 text-[9px] uppercase tracking-[0.18em] text-[var(--text3)] font-mono">
+        País
+      </p>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 mb-5">
-        {COUNTRIES.map((c) => (
+        {TRENDING_REGIONS.map((c) => (
           <button
-            key={c.code}
-            onClick={() => setCountry(c.code)}
+            key={c.value}
+            onClick={() => setCountry(c.value)}
             className={`p-3 rounded-xl text-center transition-all border ${
-              country === c.code
+              country === c.value
                 ? "bg-[rgba(255,61,61,0.1)] border-[var(--accent)]"
                 : "bg-[var(--card)] border-[var(--border)] hover:border-[var(--border2)]"
             }`}
           >
             <span className="text-2xl block mb-1">{c.flag}</span>
-            <span className={`text-[11px] font-mono ${country === c.code ? "text-[var(--accent)]" : "text-[var(--text2)]"}`}>
+            <span className={`text-[11px] font-mono ${country === c.value ? "text-[var(--accent)]" : "text-[var(--text2)]"}`}>
               {c.name}
             </span>
           </button>
         ))}
       </div>
 
+      <p className="mb-2 text-[9px] uppercase tracking-[0.18em] text-[var(--text3)] font-mono">
+        Categoria
+      </p>
       <div className="flex gap-1 flex-wrap mb-5 p-1.5 bg-[var(--card)] rounded-xl border border-[var(--border)] w-fit">
-        {CATEGORIES.map((c) => (
+        {YOUTUBE_CATEGORY_BUTTONS.map((c) => (
           <button
             key={c.id}
             onClick={() => setCategory(c.id)}
@@ -172,7 +160,11 @@ export default function TrendingPage() {
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4 items-center">
-        <div className="flex gap-1 p-1 bg-[var(--card)] rounded-lg border border-[var(--border)]">
+        <div className="flex flex-col gap-1.5">
+          <p className="text-[9px] uppercase tracking-[0.18em] text-[var(--text3)] font-mono">
+            Formato
+          </p>
+          <div className="flex gap-1 p-1 bg-[var(--card)] rounded-lg border border-[var(--border)]">
           {(["all", "shorts", "longform"] as const).map((f) => (
             <button
               key={f}
@@ -186,6 +178,7 @@ export default function TrendingPage() {
               {f === "all" ? "Todos" : f === "shorts" ? "⚡ Shorts" : "📺 Long Form"}
             </button>
           ))}
+          </div>
         </div>
         {!loading && filteredVideos.length > 0 && (
           <SortControls value={sortBy} onChange={setSortBy} />

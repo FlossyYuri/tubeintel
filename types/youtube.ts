@@ -98,3 +98,16 @@ export interface VideoWithStats {
   caption?: string;
   liveBroadcastContent?: string;
 }
+
+export interface RevenueParams {
+  shortsRpm: number;
+  longFormRpm: number;
+}
+
+export interface RevenueEstimate {
+  shortsRevenue: number;
+  longFormRevenue: number;
+  totalRevenue: number;
+  shortsViews: number;
+  longFormViews: number;
+}

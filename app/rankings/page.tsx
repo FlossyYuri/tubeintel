@@ -4,32 +4,16 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { VideoGrid } from "@/components/video/VideoGrid";
 import { VideoModal } from "@/components/video/VideoModal";
-import { PageHeader, Spinner, EmptyState, ErrorMessage } from "@/components/ui";
+import { PageHeader, Spinner, EmptyState, ErrorMessage, FilterSelect } from "@/components/ui";
 import { sectionTitle } from "@/lib/design-tokens";
 import { input } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
+import { YOUTUBE_CATEGORY_OPTIONS } from "@/lib/categories";
+import { TRENDING_SELECT_REGIONS } from "@/lib/regions";
 import { calcViralScore } from "@/lib/viral-score";
 import { isShort, getDurationSeconds } from "@/lib/format";
 import type { VideoWithStats } from "@/types/youtube";
 import type { YouTubeVideoItem } from "@/types/youtube";
-
-const REGIONS = [
-  { value: "PT", label: "🇵🇹 PT" },
-  { value: "BR", label: "🇧🇷 BR" },
-  { value: "US", label: "🇺🇸 US" },
-  { value: "GB", label: "🇬🇧 UK" },
-];
-
-const VIDEO_CATEGORIES = [
-  { id: "0", name: "Todos" },
-  { id: "10", name: "Música" },
-  { id: "20", name: "Gaming" },
-  { id: "22", name: "People" },
-  { id: "23", name: "Comédia" },
-  { id: "24", name: "Entretenimento" },
-  { id: "25", name: "Notícias" },
-  { id: "28", name: "Tecnologia" },
-];
 
 function transformVideo(v: YouTubeVideoItem): VideoWithStats {
   const stats = v.statistics;
@@ -66,8 +50,8 @@ type Tab = "videos" | "channels";
 
 export default function RankingsPage() {
   const [tab, setTab] = useState<Tab>("videos");
-  const [region, setRegion] = useState("PT");
-  const [category, setCategory] = useState("0");
+  const [region, setRegion] = useState("US");
+  const [category, setCategory] = useState("");
   const [keyword, setKeyword] = useState("viral");
   const [searchKeyword, setSearchKeyword] = useState("viral");
   const [formatFilter, setFormatFilter] = useState<"all" | "shorts" | "longform">("all");
@@ -215,69 +199,71 @@ export default function RankingsPage() {
       </div>
 
       <div className="bg-gradient-to-br from-[var(--card)] to-[var(--card2)] border border-[var(--border)] rounded-2xl p-6 mb-7">
-        <div className="flex flex-wrap gap-2.5 items-center">
+        <div className="flex flex-wrap gap-2.5 items-end">
           {tab === "videos" ? (
             <>
-              <select
+              <FilterSelect
+                label="Região"
                 value={region}
-                onChange={(e) => setRegion(e.target.value)}
-                className={cn(input, "cursor-pointer")}
-              >
-                {REGIONS.map((r) => (
-                  <option key={r.value} value={r.value}>{r.label}</option>
-                ))}
-              </select>
-              <select
+                onChange={setRegion}
+                options={TRENDING_SELECT_REGIONS}
+              />
+              <FilterSelect
+                label="Categoria"
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className={cn(input, "cursor-pointer")}
-              >
-                {VIDEO_CATEGORIES.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-              <div className="flex gap-1 p-1 bg-[var(--card)] rounded-lg border border-[var(--border)]">
-                {(["all", "shorts", "longform"] as const).map((f) => (
-                  <button
-                    key={f}
-                    onClick={() => setFormatFilter(f)}
-                    className={cn(
-                      "px-3 py-1.5 text-xs font-mono rounded transition-colors",
-                      formatFilter === f
-                        ? "bg-[var(--card2)] text-[var(--text)]"
-                        : "text-[var(--text3)] hover:text-[var(--text)]"
-                    )}
-                  >
-                    {f === "all" ? "Todos" : f === "shorts" ? "⚡ Shorts" : "📺 Long Form"}
-                  </button>
-                ))}
+                onChange={setCategory}
+                options={YOUTUBE_CATEGORY_OPTIONS}
+              />
+              <div className="flex flex-col gap-1.5">
+                <p className="text-[9px] uppercase tracking-[0.18em] text-[var(--text3)] font-mono">
+                  Formato
+                </p>
+                <div className="flex gap-1 p-1 bg-[var(--card)] rounded-lg border border-[var(--border)]">
+                  {(["all", "shorts", "longform"] as const).map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => setFormatFilter(f)}
+                      className={cn(
+                        "px-3 py-1.5 text-xs font-mono rounded transition-colors",
+                        formatFilter === f
+                          ? "bg-[var(--card2)] text-[var(--text)]"
+                          : "text-[var(--text3)] hover:text-[var(--text)]"
+                      )}
+                    >
+                      {f === "all" ? "Todos" : f === "shorts" ? "⚡ Shorts" : "📺 Long Form"}
+                    </button>
+                  ))}
+                </div>
               </div>
             </>
           ) : (
             <>
-              <input
-                type="text"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && setSearchKeyword(keyword)}
-                placeholder="Nicho ou keyword..."
-                className={input}
-              />
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="rankings-keyword" className="text-[9px] uppercase tracking-[0.18em] text-[var(--text3)] font-mono">
+                  Keyword
+                </label>
+                <input
+                  id="rankings-keyword"
+                  type="text"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && setSearchKeyword(keyword)}
+                  placeholder="Nicho ou keyword..."
+                  className={input}
+                />
+              </div>
               <button
                 onClick={() => setSearchKeyword(keyword)}
                 className="px-4 py-2 bg-[var(--accent)] text-white text-sm font-bold rounded-xl hover:bg-[#ff5555] transition-all"
               >
                 Buscar
               </button>
-              <select
+              <FilterSelect
+                label="Região"
                 value={region}
-                onChange={(e) => setRegion(e.target.value)}
-                className={cn(input, "cursor-pointer")}
-              >
-                {REGIONS.map((r) => (
-                  <option key={r.value} value={r.value}>{r.label}</option>
-                ))}
-              </select>
+                onChange={setRegion}
+                options={TRENDING_SELECT_REGIONS}
+              />
             </>
           )}
         </div>

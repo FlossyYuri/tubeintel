@@ -13,6 +13,8 @@ export async function GET(request: NextRequest) {
     const order = ["date", "viewCount", "relevance", "rating"].includes(orderParam)
       ? orderParam
       : "date";
+    const publishedAfterParam = searchParams.get("publishedAfter") || "";
+    const daysParam = searchParams.get("days") || "";
 
     if (!channelId) {
       return NextResponse.json(
@@ -21,7 +23,21 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const key = cacheKey("channel", "channel-videos", { channelId, maxResults, pageToken, order });
+    let publishedAfter = publishedAfterParam;
+    if (!publishedAfter && daysParam) {
+      const days = parseInt(daysParam, 10);
+      if (!isNaN(days) && days > 0) {
+        publishedAfter = new Date(Date.now() - days * 86400000).toISOString();
+      }
+    }
+
+    const key = cacheKey("channel", "channel-videos", {
+      channelId,
+      maxResults,
+      pageToken,
+      order,
+      publishedAfter,
+    });
     const cached = cache.get<{ search: YouTubeSearchResponse; videos: YouTubeVideosResponse }>(key);
     if (cached) return NextResponse.json(cached);
 
@@ -33,6 +49,7 @@ export async function GET(request: NextRequest) {
       maxResults,
     };
     if (pageToken) searchParamsObj.pageToken = pageToken;
+    if (publishedAfter) searchParamsObj.publishedAfter = publishedAfter;
 
     const searchData = await youtubeFetch<YouTubeSearchResponse>("search", searchParamsObj);
 

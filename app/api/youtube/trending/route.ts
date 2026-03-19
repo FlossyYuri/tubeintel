@@ -6,7 +6,7 @@ import type { YouTubeVideosResponse } from "@/types/youtube";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const regionCode = searchParams.get("regionCode") || "PT";
+    const regionCode = searchParams.get("regionCode") || "US";
     const videoCategoryId = searchParams.get("videoCategoryId") || "0";
     const pageToken = searchParams.get("pageToken") || "";
 

@@ -4,30 +4,14 @@ import { useState, useEffect, useCallback } from "react";
 import { StudyVideoGrid } from "@/components/video/StudyVideoGrid";
 import { VideoModal } from "@/components/video/VideoModal";
 import { PageHeader, Spinner, EmptyState, ErrorMessage } from "@/components/ui";
+import { YOUTUBE_CATEGORY_BUTTONS } from "@/lib/categories";
+import { TRENDING_REGIONS } from "@/lib/regions";
 import { mergeSearchWithVideos } from "@/lib/transform";
 import { calcViralScore } from "@/lib/viral-score";
 import { isShort, getDurationSeconds } from "@/lib/format";
 import type { VideoWithStats } from "@/types/youtube";
 import type { YouTubeVideoItem } from "@/types/youtube";
 import type { StudyMode, StudyFormat } from "@/components/video/StudyVideoCard";
-
-const COUNTRIES = [
-  { code: "PT", flag: "🇵🇹", name: "Portugal" },
-  { code: "BR", flag: "🇧🇷", name: "Brasil" },
-  { code: "US", flag: "🇺🇸", name: "USA" },
-  { code: "GB", flag: "🇬🇧", name: "UK" },
-];
-
-const CATEGORIES = [
-  { id: "0", name: "Todos" },
-  { id: "10", name: "Música" },
-  { id: "20", name: "Gaming" },
-  { id: "22", name: "People" },
-  { id: "23", name: "Comédia" },
-  { id: "24", name: "Entretenimento" },
-  { id: "25", name: "Notícias" },
-  { id: "28", name: "Tecnologia" },
-];
 
 const STUDY_MODES: { value: StudyMode; format: StudyFormat; label: string }[] = [
   { value: "titles", format: "longform", label: "Títulos Long Form" },
@@ -67,7 +51,7 @@ function transformVideo(v: YouTubeVideoItem): VideoWithStats {
 }
 
 export default function StudyPage() {
-  const [region, setRegion] = useState("PT");
+  const [region, setRegion] = useState("US");
   const [category, setCategory] = useState("0");
   const [studyModeIndex, setStudyModeIndex] = useState(0);
   const [videos, setVideos] = useState<VideoWithStats[]>([]);
@@ -209,12 +193,12 @@ export default function StudyPage() {
             Região
           </p>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {COUNTRIES.map((c) => (
+            {TRENDING_REGIONS.map((c) => (
               <button
-                key={c.code}
-                onClick={() => setRegion(c.code)}
+                key={c.value}
+                onClick={() => setRegion(c.value)}
                 className={`rounded-xl border p-3 text-center transition-all ${
-                  region === c.code
+                  region === c.value
                     ? "border-[rgba(232,68,28,0.4)] bg-[rgba(232,68,28,0.08)]"
                     : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.1]"
                 }`}
@@ -222,7 +206,7 @@ export default function StudyPage() {
                 <span className="text-2xl block mb-1">{c.flag}</span>
                 <span
                   className={`text-[11px] font-mono ${
-                    region === c.code ? "text-[#E8441C]" : "text-[#8A8880]"
+                    region === c.value ? "text-[#E8441C]" : "text-[#8A8880]"
                   }`}
                 >
                   {c.name}
@@ -240,7 +224,7 @@ export default function StudyPage() {
             Categoria
           </p>
           <div className="flex flex-wrap gap-1.5 p-1.5 rounded-xl border border-white/[0.06] bg-white/[0.02] w-fit">
-            {CATEGORIES.map((c) => (
+            {YOUTUBE_CATEGORY_BUTTONS.map((c) => (
               <button
                 key={c.id}
                 onClick={() => setCategory(c.id)}

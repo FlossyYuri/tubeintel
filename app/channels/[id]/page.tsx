@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { ChannelStats } from "@/components/channel/ChannelStats";
 import { ChannelGrowthChart } from "@/components/channel/ChannelGrowthChart";
+import { ChannelPerformanceBreakdown } from "@/components/channel/ChannelPerformanceBreakdown";
+import { RevenueEstimator } from "@/components/channel/RevenueEstimator";
 import { RisingBadge } from "@/components/channel/RisingBadge";
 import { VideoGrid } from "@/components/video/VideoGrid";
 import { VideoModal } from "@/components/video/VideoModal";
@@ -37,6 +39,11 @@ export default function ChannelDetailPage() {
   const [error, setError] = useState("");
   const [selectedVideo, setSelectedVideo] = useState<VideoWithStats | null>(null);
   const [videoSort, setVideoSort] = useState<VideoSortKey>("recent");
+  const [analytics, setAnalytics] = useState<{
+    shorts: { views: number; durationSeconds: number; likes: number; comments: number; videoCount: number };
+    longForm: { views: number; durationSeconds: number; likes: number; comments: number; videoCount: number };
+    periodDays: number;
+  } | null>(null);
 
   const apiOrder =
     videoSort === "views"
@@ -56,10 +63,12 @@ export default function ChannelDetailPage() {
       fetch(
         `/api/youtube/channel-videos?channelId=${id}&maxResults=12&order=${apiOrder}`
       ),
+      fetch(`/api/youtube/channel-analytics?channelId=${id}&days=28`),
     ])
-      .then(async ([chRes, vRes]) => {
+      .then(async ([chRes, vRes, aRes]) => {
         const chData = await chRes.json();
         const vData = await vRes.json();
+        const aData = await aRes.json();
 
         if (!chRes.ok) throw new Error(chData.error || "Channel failed");
         if (!vRes.ok) throw new Error(vData.error || "Videos failed");
@@ -80,11 +89,22 @@ export default function ChannelDetailPage() {
         const merged = mergeSearchWithVideos(vData.search?.items || [], vData.videos?.items || []);
         setVideos(merged);
         setNextPageToken(vData.nextPageToken);
+
+        if (aRes.ok && aData.shorts != null && aData.longForm != null) {
+          setAnalytics({
+            shorts: aData.shorts,
+            longForm: aData.longForm,
+            periodDays: aData.periodDays ?? 28,
+          });
+        } else {
+          setAnalytics(null);
+        }
       })
       .catch((err) => {
         setError(err.message);
         setChannel(null);
         setVideos([]);
+        setAnalytics(null);
       })
       .finally(() => setLoading(false));
   }, [id, apiOrder]);
@@ -232,6 +252,21 @@ export default function ChannelDetailPage() {
         avgViews={avgViews}
         avgEngagement={avgEngagement}
       />
+
+      {analytics && (
+        <>
+          <ChannelPerformanceBreakdown
+            shorts={analytics.shorts}
+            longForm={analytics.longForm}
+            periodDays={analytics.periodDays}
+          />
+          <RevenueEstimator
+            shortsViews={analytics.shorts.views}
+            longFormViews={analytics.longForm.views}
+            periodDays={analytics.periodDays}
+          />
+        </>
+      )}
 
       {chartData.length > 0 && (
         <div className="mb-6">

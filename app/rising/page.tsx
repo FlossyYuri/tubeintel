@@ -4,20 +4,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ChannelCard } from "@/components/channel/ChannelCard";
 import { RisingBadge } from "@/components/channel/RisingBadge";
-import { PageHeader, Spinner, EmptyState, ErrorMessage } from "@/components/ui";
+import { PageHeader, Spinner, EmptyState, ErrorMessage, FilterSelect } from "@/components/ui";
 import { input, buttonPrimary } from "@/lib/design-tokens";
-
-const REGIONS = [
-  { value: "PT", label: "🇵🇹 PT" },
-  { value: "BR", label: "🇧🇷 BR" },
-  { value: "US", label: "🇺🇸 US" },
-  { value: "GB", label: "🇬🇧 UK" },
-];
+import { SELECT_REGIONS } from "@/lib/regions";
 
 export default function RisingPage() {
   const [keyword, setKeyword] = useState("viral");
   const [searchKeyword, setSearchKeyword] = useState("viral");
-  const [region, setRegion] = useState("PT");
+  const [region, setRegion] = useState("US");
   const [channels, setChannels] = useState<Array<{
     channelId: string;
     name: string;
@@ -78,30 +72,33 @@ export default function RisingPage() {
       />
 
       <div className="bg-gradient-to-br from-[var(--card)] to-[var(--card2)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 mb-7">
-        <div className="flex flex-col sm:flex-row gap-2.5 flex-wrap">
-          <input
-            type="text"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && setSearchKeyword(keyword)}
-            placeholder="Nicho ou keyword..."
-            className={input}
-          />
+        <div className="flex flex-col sm:flex-row gap-2.5 flex-wrap items-end">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="rising-keyword" className="text-[9px] uppercase tracking-[0.18em] text-[var(--text3)] font-mono">
+              Keyword
+            </label>
+            <input
+              id="rising-keyword"
+              type="text"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && setSearchKeyword(keyword)}
+              placeholder="Nicho ou keyword..."
+              className={input}
+            />
+          </div>
           <button
             onClick={() => setSearchKeyword(keyword)}
             className={buttonPrimary}
           >
             Buscar
           </button>
-          <select
+          <FilterSelect
+            label="Região"
             value={region}
-            onChange={(e) => setRegion(e.target.value)}
-            className={input}
-          >
-            {REGIONS.map((r) => (
-              <option key={r.value} value={r.value}>{r.label}</option>
-            ))}
-          </select>
+            onChange={setRegion}
+            options={SELECT_REGIONS}
+          />
         </div>
       </div>
 
