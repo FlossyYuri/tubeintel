@@ -59,12 +59,12 @@ export function VideoModal({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="bg-[var(--bg2)] border border-[var(--border2)] rounded-2xl w-full max-w-[700px] max-h-[85vh] sm:max-h-[90vh] overflow-y-auto p-4 sm:p-7 relative"
+        className="bg-[#0a0a0f] border border-white/[0.06] rounded-2xl w-full max-w-[min(700px,calc(100vw-2rem))] max-h-[85vh] sm:max-h-[90vh] overflow-y-auto p-4 sm:p-7 relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2.5 sm:p-2 bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-lg flex items-center justify-center hover:bg-[var(--accent)] hover:border-[var(--accent)] transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
+          className="absolute top-4 right-4 p-2.5 sm:p-2 bg-white/[0.02] border border-white/[0.06] text-[#F0EEE8] rounded-lg flex items-center justify-center hover:bg-[#E8441C] hover:border-[#E8441C] hover:text-white transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[#E8441C] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
           aria-label="Fechar"
         >
           <X className="size-4" />
@@ -73,7 +73,7 @@ export function VideoModal({
         <h3 className="text-base sm:text-lg font-bold mb-1 pr-12 font-display">
           {video.title}
         </h3>
-        <p className="text-[var(--blue2)] text-sm mb-4">
+        <p className="text-[#4A9EE8] text-sm mb-4">
           {video.channelId ? (
             <Link
               href={`/channels/${video.channelId}`}
@@ -124,7 +124,7 @@ export function VideoModal({
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 p-3 bg-[var(--card)] rounded-xl border border-[var(--border)]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 p-3 bg-white/[0.02] rounded-xl border border-white/[0.06]">
           <div>
             <div className="text-[10px] text-[var(--text3)] font-mono uppercase tracking-wider">
               Engagement
@@ -170,7 +170,7 @@ export function VideoModal({
               {video.tags.slice(0, 12).map((tag) => (
                 <span
                   key={tag}
-                  className="px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--border)] text-[11px] text-[var(--text2)]"
+                  className="px-2 py-0.5 rounded-full bg-white/[0.02] border border-white/[0.06] text-[11px] text-[#8A8880]"
                 >
                   {tag}
                 </span>
@@ -207,7 +207,7 @@ export function VideoModal({
               }}
               disabled={removing}
               className={cn(
-                "inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl border border-[var(--accent)]/50 bg-[var(--accent)]/10 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-colors disabled:opacity-50"
+                "inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl border border-[rgba(232,68,28,0.5)] bg-[rgba(232,68,28,0.1)] text-[#E8441C] hover:bg-[rgba(232,68,28,0.2)] transition-colors disabled:opacity-50"
               )}
             >
               {removing ? "A remover..." : "Remover da colecção"}

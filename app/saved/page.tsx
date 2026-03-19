@@ -70,7 +70,7 @@ export default function SavedPage() {
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleCreate()}
           placeholder="Nova colecção..."
-          className={cn(input, "flex-1 max-w-xs")}
+          className={cn(input, "flex-1 w-full sm:max-w-xs")}
         />
         <button
           onClick={handleCreate}

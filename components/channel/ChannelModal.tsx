@@ -72,12 +72,12 @@ export function ChannelModal({ channel, onClose }: ChannelModalProps) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="w-full max-w-[600px] max-h-[85vh] overflow-y-auto rounded-2xl border border-white/[0.08] bg-[#0f0f14] p-4 sm:p-7 relative"
+        className="w-full max-w-[min(600px,calc(100vw-2rem))] max-h-[85vh] overflow-y-auto rounded-2xl border border-white/[0.06] bg-[#0a0a0f] p-4 sm:p-7 relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2.5 rounded-lg flex items-center justify-center border border-white/[0.06] bg-white/[0.02] text-[#8A8880] hover:bg-white/[0.06] hover:text-[#F0EEE8] transition-colors duration-200"
+          className="absolute top-4 right-4 p-2.5 rounded-lg flex items-center justify-center border border-white/[0.06] bg-white/[0.02] text-[#8A8880] hover:bg-[#E8441C] hover:border-[#E8441C] hover:text-white transition-colors duration-200"
           aria-label="Fechar"
         >
           <X className="size-4" />

@@ -97,19 +97,19 @@ export function SaveToCollectionModal({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="bg-[var(--bg2)] border border-[var(--border2)] rounded-2xl w-full max-w-[420px] max-h-[85vh] overflow-y-auto p-4 sm:p-6 relative"
+        className="bg-[#0a0a0f] border border-white/[0.06] rounded-2xl w-full max-w-[min(420px,calc(100vw-2rem))] max-h-[85vh] overflow-y-auto p-4 sm:p-6 relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-lg bg-[var(--card)] border border-[var(--border)] hover:bg-[var(--border)] transition-colors"
+          className="absolute top-4 right-4 p-2 rounded-lg bg-white/[0.02] border border-white/[0.06] text-[#F0EEE8] hover:bg-[#E8441C] hover:border-[#E8441C] hover:text-white transition-colors"
           aria-label="Fechar"
         >
           <X className="size-4" />
         </button>
 
         <h3 className="text-lg font-bold mb-1 pr-10 font-display flex items-center gap-2">
-          <Bookmark className="size-5 text-[var(--accent)]" />
+          <Bookmark className="size-5 text-[#E8441C]" />
           Guardar em colecção
         </h3>
         <p className="text-sm text-[var(--text3)] mb-4 line-clamp-2">
@@ -117,7 +117,7 @@ export function SaveToCollectionModal({
         </p>
 
         {error && (
-          <p className="text-sm text-[var(--accent)] mb-3">{error}</p>
+          <p className="text-sm text-[#E8441C] mb-3">{error}</p>
         )}
 
         {loading ? (
@@ -130,7 +130,7 @@ export function SaveToCollectionModal({
                 onClick={() => handleSave(c.id)}
                 disabled={!!savingId}
                 className={cn(
-                  "w-full flex items-center justify-between p-3 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--card2)] transition-colors text-left disabled:opacity-50"
+                  "w-full flex items-center justify-between p-3 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] transition-colors text-left disabled:opacity-50"
                 )}
               >
                 <span className="font-medium truncate flex-1">
@@ -142,7 +142,7 @@ export function SaveToCollectionModal({
                   </span>
                 )}
                 {savingId === c.id && (
-                  <span className="text-xs text-[var(--accent)] ml-2">
+                  <span className="text-xs text-[#E8441C] ml-2">
                     A guardar...
                   </span>
                 )}
@@ -151,18 +151,18 @@ export function SaveToCollectionModal({
           </div>
         )}
 
-        <div className="border-t border-[var(--border)] pt-4">
+        <div className="border-t border-white/[0.06] pt-4">
           <p className="text-xs text-[var(--text3)] mb-2 font-mono uppercase tracking-wider">
             Criar nova colecção
           </p>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleCreateAndSave()}
               placeholder="Nome da colecção..."
-              className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text)] outline-none focus:border-[var(--blue)]"
+              className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-white/[0.06] bg-[#0a0a0f] text-[#F0EEE8] outline-none focus:border-[#E8441C] focus-visible:ring-2 focus-visible:ring-[#E8441C]/30"
             />
             <button
               onClick={handleCreateAndSave}

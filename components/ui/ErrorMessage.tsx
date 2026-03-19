@@ -11,7 +11,7 @@ export function ErrorMessage({ message, className }: ErrorMessageProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-2.5 p-4 rounded-xl bg-[rgba(255,61,61,0.08)] border border-[rgba(255,61,61,0.3)] text-sm text-[var(--text2)]",
+        "flex items-center gap-2.5 p-4 rounded-xl bg-[rgba(232,68,28,0.08)] border border-[rgba(232,68,28,0.3)] text-sm text-[#8A8880]",
         className
       )}
       role="alert"

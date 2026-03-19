@@ -29,11 +29,11 @@ export function SortControls({
   label = "Ordenar:",
 }: SortControlsProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <span className="text-[11px] text-[var(--text3)] font-mono">
         {label}
       </span>
-      <div className="flex gap-1 p-1 bg-[var(--card)] rounded-lg border border-[var(--border)]">
+      <div className="flex flex-wrap gap-1 p-1 bg-[var(--card)] rounded-lg border border-[var(--border)]">
         {options.map((opt) => (
           <button
             key={opt}

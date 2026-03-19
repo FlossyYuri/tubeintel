@@ -134,7 +134,7 @@ function NicheCard({
         card,
         "p-4 rounded-xl text-center transition-all duration-200 border",
         isSelected
-          ? "bg-[rgba(255,61,61,0.08)] border-[var(--accent)]"
+          ? "bg-[rgba(232,68,28,0.08)] border-[var(--accent)]"
           : "hover:border-[var(--border2)] hover:-translate-y-0.5"
       )}
     >

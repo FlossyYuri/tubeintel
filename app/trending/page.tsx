@@ -120,14 +120,14 @@ function TrendingPageContent() {
       <p className="mb-2 text-[9px] uppercase tracking-[0.18em] text-[var(--text3)] font-mono">
         País
       </p>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 mb-5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 mb-5">
         {TRENDING_REGIONS.map((c) => (
           <button
             key={c.value}
             onClick={() => updateParams({ region: c.value })}
             className={`p-3 rounded-xl text-center transition-all border ${
               country === c.value
-                ? "bg-[rgba(255,61,61,0.1)] border-[var(--accent)]"
+                ? "bg-[rgba(232,68,28,0.1)] border-[var(--accent)]"
                 : "bg-[var(--card)] border-[var(--border)] hover:border-[var(--border2)]"
             }`}
           >
@@ -164,7 +164,7 @@ function TrendingPageContent() {
           <p className="text-[9px] uppercase tracking-[0.18em] text-[var(--text3)] font-mono">
             Formato
           </p>
-          <div className="flex gap-1 p-1 bg-[var(--card)] rounded-lg border border-[var(--border)]">
+          <div className="flex flex-wrap gap-1 p-1 bg-[var(--card)] rounded-lg border border-[var(--border)]">
           {(["all", "shorts", "longform"] as const).map((f) => (
             <button
               key={f}

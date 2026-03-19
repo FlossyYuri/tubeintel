@@ -257,7 +257,7 @@ function RankingsPageContent() {
               </div>
               <button
                 onClick={() => updateParams({ keyword: keyword.trim() || "viral" })}
-                className="px-4 py-2 bg-[var(--accent)] text-white text-sm font-bold rounded-xl hover:bg-[#ff5555] transition-all"
+                className="px-4 py-2 bg-[var(--accent)] text-white text-sm font-bold rounded-xl hover:bg-[#FF6B3D] transition-all"
               >
                 Buscar
               </button>

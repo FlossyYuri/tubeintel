@@ -114,7 +114,7 @@ export default function AlertsPage() {
           <option value="channel">Canal</option>
         </select>
         {type === "channel" ? (
-          <div className="flex-1 min-w-[200px]">
+          <div className="flex-1 min-w-0">
             {selectedChannel ? (
               <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--card)] border border-[var(--border)] h-full">
                 <div className="size-8 rounded-full bg-[var(--bg3)] overflow-hidden shrink-0">
@@ -172,7 +172,7 @@ export default function AlertsPage() {
             return (
             <div
               key={a.id}
-              className={cn(card, "flex items-center justify-between p-4 gap-3")}
+              className={cn(card, "flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 gap-3")}
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 {a.type === "channel" && meta?.thumbnail ? (
@@ -195,7 +195,7 @@ export default function AlertsPage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-wrap gap-2 justify-end shrink-0">
                 {a.type === "channel" && (
                   <Link
                     href={`/monitor?channelId=${encodeURIComponent(a.value)}`}

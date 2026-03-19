@@ -38,7 +38,7 @@ export function StudyVideoCard({
         tabIndex={0}
         onKeyDown={(e) => e.key === "Enter" && onOpen?.(video)}
       >
-        <div className="relative w-[120px] min-w-[120px] aspect-video bg-[var(--bg3)] overflow-hidden shrink-0">
+        <div className="relative w-24 min-w-24 sm:w-[120px] sm:min-w-[120px] aspect-video bg-[var(--bg3)] overflow-hidden shrink-0">
           {video.thumbnail && (
             <Image
               src={video.thumbnail}

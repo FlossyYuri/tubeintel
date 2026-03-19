@@ -106,7 +106,7 @@ export function ChannelMonitorCard({
         )}
       >
         <Spinner className="mb-3" />
-        <p className="text-xs text-[var(--text3)]">A carregar canal...</p>
+        <p className="text-xs text-[#4A4845]">A carregar canal...</p>
       </div>
     );
   }
@@ -116,7 +116,7 @@ export function ChannelMonitorCard({
       <div
         className={cn(
           card,
-          "p-6 border-[var(--accent)]/30 text-[var(--accent)] text-sm"
+          "p-6 border-[rgba(232,68,28,0.3)] text-[#E8441C] text-sm"
         )}
       >
         {error || "Canal não encontrado"}
@@ -137,29 +137,31 @@ export function ChannelMonitorCard({
   return (
     <div className={cn(card, "overflow-hidden")}>
       {/* Header */}
-      <div className="flex items-center gap-4 p-4 border-b border-[var(--border)]">
-        <div className="size-14 rounded-full bg-[var(--bg3)] overflow-hidden shrink-0">
-          {channel.thumbnail && (
-            <Image
-              src={channel.thumbnail}
-              alt=""
-              width={56}
-              height={56}
-              className="w-full h-full object-cover"
-            />
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-bold truncate text-[var(--text)]">
-            {channel.name}
-          </h3>
-          <p className="text-xs text-[var(--text3)] font-mono">
-            {formatNumber(channel.subscriberCount)} subs
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 border-b border-white/[0.06]">
+        <div className="flex items-center gap-4 flex-1 min-w-0">
+          <div className="size-14 rounded-full bg-[#111118] overflow-hidden shrink-0">
+            {channel.thumbnail && (
+              <Image
+                src={channel.thumbnail}
+                alt=""
+                width={56}
+                height={56}
+                className="w-full h-full object-cover"
+              />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold truncate text-[#F0EEE8]">
+              {channel.name}
+            </h3>
+            <p className="text-xs text-[#4A4845] font-mono">
+              {formatNumber(channel.subscriberCount)} subs
+            </p>
+          </div>
         </div>
         <Link
           href={`/channels/${channelId}`}
-          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[var(--border)] text-[var(--blue2)] hover:border-[var(--blue2)] hover:bg-[var(--blue2)]/10 transition-colors text-sm font-medium"
+          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-white/[0.06] text-[#4A9EE8] hover:border-[#E8441C] hover:bg-[rgba(232,68,28,0.08)] transition-colors text-sm font-medium w-fit"
         >
           <ExternalLink className="size-4" />
           Ver análise
@@ -170,13 +172,13 @@ export function ChannelMonitorCard({
         <>
           {/* 28 days summary */}
           {analytics && (analytics.shorts.videoCount > 0 || analytics.longForm.videoCount > 0) && (
-            <div className="p-4 border-b border-[var(--border)]">
-              <h4 className="text-[10px] font-mono uppercase tracking-wider text-[var(--text3)] mb-3">
+            <div className="p-4 border-b border-white/[0.06]">
+              <h4 className="text-[10px] font-mono uppercase tracking-wider text-[#4A4845] mb-3">
                 Últimos {analytics.periodDays} dias
               </h4>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-2.5 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
-                  <div className="flex items-center gap-1.5 text-[var(--accent)] mb-0.5">
+                <div className="p-2.5 rounded-lg bg-[#07070c] border border-white/[0.06]">
+                  <div className="flex items-center gap-1.5 text-[#E8441C] mb-0.5">
                     <Eye className="size-3.5" />
                     <span className="text-[10px] font-mono uppercase">Views</span>
                   </div>
@@ -185,31 +187,31 @@ export function ChannelMonitorCard({
                   </div>
                 </div>
                 {analytics.shorts.videoCount > 0 && (
-                  <div className="p-2.5 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
-                    <span className="text-[10px] font-mono uppercase text-[var(--purple)]">
+                  <div className="p-2.5 rounded-lg bg-[#07070c] border border-white/[0.06]">
+                    <span className="text-[10px] font-mono uppercase text-[#9B6EE8]">
                       Shorts
                     </span>
-                    <div className="font-bold text-sm text-[var(--purple)]">
+                    <div className="font-bold text-sm text-[#9B6EE8]">
                       {formatNumber(analytics.shorts.views)}
                     </div>
                   </div>
                 )}
                 {analytics.longForm.videoCount > 0 && (
-                  <div className="p-2.5 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
-                    <span className="text-[10px] font-mono uppercase text-[var(--blue2)]">
+                  <div className="p-2.5 rounded-lg bg-[#07070c] border border-white/[0.06]">
+                    <span className="text-[10px] font-mono uppercase text-[#5ba3ff]">
                       Long Form
                     </span>
-                    <div className="font-bold text-sm text-[var(--blue2)]">
+                    <div className="font-bold text-sm text-[#5ba3ff]">
                       {formatNumber(analytics.longForm.views)}
                     </div>
                   </div>
                 )}
                 {revenue && revenue.totalRevenue > 0 && (
-                  <div className="p-2.5 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
-                    <span className="text-[10px] font-mono uppercase text-[var(--green)]">
+                  <div className="p-2.5 rounded-lg bg-[#07070c] border border-white/[0.06]">
+                    <span className="text-[10px] font-mono uppercase text-[#3DBF7F]">
                       Receita est.
                     </span>
-                    <div className="font-bold text-sm text-[var(--green)]">
+                    <div className="font-bold text-sm text-[#3DBF7F]">
                       ${revenue.totalRevenue.toFixed(2)}
                     </div>
                   </div>
@@ -221,7 +223,7 @@ export function ChannelMonitorCard({
           {/* Recent videos */}
           {videos.length > 0 && (
             <div className="p-4">
-              <h4 className="text-[10px] font-mono uppercase tracking-wider text-[var(--text3)] mb-3 flex items-center gap-1.5">
+              <h4 className="text-[10px] font-mono uppercase tracking-wider text-[#4A4845] mb-3 flex items-center gap-1.5">
                 <Video className="size-3.5" />
                 Vídeos recentes
               </h4>
@@ -230,9 +232,9 @@ export function ChannelMonitorCard({
                   <button
                     key={v.videoId}
                     onClick={() => setSelectedVideo(v)}
-                    className="text-left rounded-lg border border-[var(--border)] overflow-hidden hover:border-[var(--border2)] transition-colors group"
+                    className="text-left rounded-lg border border-white/[0.06] overflow-hidden hover:border-white/[0.1] transition-colors group"
                   >
-                    <div className="relative aspect-video bg-[var(--bg3)]">
+                    <div className="relative aspect-video bg-[#111118]">
                       {v.thumbnail && (
                         <Image
                           src={v.thumbnail}
@@ -246,7 +248,7 @@ export function ChannelMonitorCard({
                         {v.duration ? parseDuration(v.duration) : "—"}
                       </div>
                       {isShort(v.duration || "", v.title) && (
-                        <div className="absolute top-1 right-1 bg-[var(--purple)] text-white text-[8px] px-1 rounded">
+                        <div className="absolute top-1 right-1 bg-[#9B6EE8] text-white text-[8px] px-1 rounded">
                           Short
                         </div>
                       )}
@@ -255,8 +257,8 @@ export function ChannelMonitorCard({
                       <p className="text-[11px] font-medium line-clamp-2 mb-1">
                         {v.title}
                       </p>
-                      <div className="flex gap-2 text-[10px] text-[var(--text3)] font-mono">
-                        <span className="text-[var(--accent)]">
+                      <div className="flex gap-2 text-[10px] text-[#4A4845] font-mono">
+                        <span className="text-[#E8441C]">
                           {formatNumber(v.viewCount)}
                         </span>
                         <span>Viral {v.viralScore}</span>

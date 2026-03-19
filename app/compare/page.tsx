@@ -15,7 +15,8 @@ import {
 import { ExternalLink, Plus, X, Bell } from "lucide-react";
 import { formatNumber } from "@/lib/format";
 import { PageHeader, Spinner, ErrorMessage } from "@/components/ui";
-import { buttonPrimary } from "@/lib/design-tokens";
+import { buttonPrimary, card } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 import { ChannelSearchInput, type ChannelOption } from "@/components/search/ChannelSearchInput";
 
 const CHART_COLORS = [
@@ -280,9 +281,58 @@ export default function ComparePage() {
 
       {result && result.length > 0 && (
         <>
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 mb-6 overflow-x-auto">
+          {/* Mobile: cards empilhados */}
+          <div className="md:hidden space-y-4 mb-6">
+            {result.map((r, i) => (
+              <div key={r.channelId} className={cn(card, "p-4")}>
+                <div className="flex items-center justify-between mb-3 gap-2">
+                  <span
+                    className="font-bold truncate flex-1 min-w-0"
+                    style={{ color: CHART_COLORS[i % CHART_COLORS.length] }}
+                  >
+                    {r.name}
+                  </span>
+                  <div className="flex gap-2 shrink-0">
+                    <Link
+                      href={`/channels/${r.channelId}`}
+                      className="p-2 rounded-lg border border-white/[0.06] text-[var(--text3)] hover:opacity-80"
+                      title="Ver análise"
+                    >
+                      <ExternalLink className="size-4" />
+                    </Link>
+                    <button
+                      onClick={() => handleCreateAlert(r.channelId)}
+                      disabled={alertingId === r.channelId || alertDoneIds.has(r.channelId)}
+                      className="p-2 rounded-lg border border-white/[0.06] text-[var(--text3)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors disabled:opacity-50"
+                      title="Criar alerta"
+                    >
+                      <Bell className="size-4" />
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {metrics.map((m) => (
+                    <div key={m.key}>
+                      <span className="text-[10px] uppercase text-[var(--text3)] font-mono block mb-0.5">
+                        {m.label}
+                      </span>
+                      <div
+                        className="font-bold"
+                        style={{ color: CHART_COLORS[i % CHART_COLORS.length] }}
+                      >
+                        {formatNumber(r[m.key])}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: tabela horizontal */}
+          <div className="hidden md:block bg-white/[0.02] border border-white/[0.06] rounded-xl p-5 mb-6 overflow-x-auto">
             <div
-              className="grid gap-4 items-center mb-4 pb-4 border-b border-[var(--border)]"
+              className="grid gap-4 items-center mb-4 pb-4 border-b border-white/[0.06]"
               style={{
                 gridTemplateColumns: `1fr repeat(${result.length}, minmax(120px, 1fr))`,
               }}
@@ -308,7 +358,7 @@ export default function ComparePage() {
                   <button
                     onClick={() => handleCreateAlert(r.channelId)}
                     disabled={alertingId === r.channelId || alertDoneIds.has(r.channelId)}
-                    className="p-1.5 rounded border border-[var(--border)] text-[var(--text3)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors disabled:opacity-50"
+                    className="p-1.5 rounded border border-white/[0.06] text-[var(--text3)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors disabled:opacity-50"
                     title="Criar alerta"
                   >
                     <Bell className="size-4" />
@@ -319,7 +369,7 @@ export default function ComparePage() {
             {metrics.map((m) => (
               <div
                 key={m.label}
-                className="grid gap-4 items-center py-2.5 border-b border-[var(--border)] last:border-0"
+                className="grid gap-4 items-center py-2.5 border-b border-white/[0.06] last:border-0"
                 style={{
                   gridTemplateColumns: `1fr repeat(${result.length}, minmax(120px, 1fr))`,
                 }}
@@ -341,7 +391,7 @@ export default function ComparePage() {
           </div>
 
           {radarData.length > 0 && result.length <= 4 && (
-            <div className="h-[300px]">
+            <div className="h-[250px] sm:h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="var(--border)" />

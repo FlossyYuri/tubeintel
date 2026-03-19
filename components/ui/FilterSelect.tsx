@@ -30,7 +30,8 @@ export function FilterSelect({
     <div className={cn("flex flex-col gap-1.5", className)}>
       <label
         htmlFor={selectId}
-        className="text-[9px] uppercase tracking-[0.18em] text-[var(--text3)] font-mono"
+        className="text-[9px] uppercase tracking-[0.18em] text-[#3E3C38] font-mono"
+        style={{ fontFamily: "'DM Mono', monospace" }}
       >
         {label}
       </label>
@@ -38,7 +39,7 @@ export function FilterSelect({
         id={selectId}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={cn(input, "cursor-pointer w-full sm:min-w-[130px] sm:w-auto")}
+        className={cn(input, "cursor-pointer min-w-0 w-full sm:min-w-[130px] sm:w-auto")}
       >
         {options.map((opt) => (
           <option key={opt.value || "all"} value={opt.value}>

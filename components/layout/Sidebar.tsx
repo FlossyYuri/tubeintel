@@ -135,7 +135,7 @@ function SidebarContent({
                     href={item.href}
                     onClick={onNavigate}
                     className={cn(
-                      'group relative flex items-center gap-2.5 rounded-[10px] border px-2.5 py-[9px] transition-all duration-[180ms]',
+                      'group relative flex items-center gap-2.5 rounded-[10px] border px-2.5 py-3 min-h-[44px] transition-all duration-[180ms]',
                       isActive
                         ? 'border-[rgba(232,68,28,0.3)] bg-[rgba(232,68,28,0.12)]'
                         : 'border-transparent hover:border-white/[0.06] hover:bg-white/[0.04]',
@@ -205,7 +205,7 @@ function SidebarContent({
           href='/settings'
           onClick={onNavigate}
           className={cn(
-            'group relative flex items-center gap-2.5 rounded-[10px] border px-2.5 py-[9px] transition-all duration-[180ms]',
+            'group relative flex items-center gap-2.5 rounded-[10px] border px-2.5 py-3 min-h-[44px] transition-all duration-[180ms]',
             pathname === '/settings'
               ? 'border-[rgba(232,68,28,0.3)] bg-[rgba(232,68,28,0.12)]'
               : 'border-transparent hover:border-white/[0.06] hover:bg-white/[0.04]',
@@ -308,15 +308,15 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
 
   return (
     <>
-      {/* Desktop */}
-      <aside className={cn('hidden lg:flex', sidebarClasses)}>
+      {/* Desktop: visível a partir de md (768px) */}
+      <aside className={cn('hidden md:flex', sidebarClasses)}>
         <SidebarContent />
       </aside>
 
       {/* Mobile drawer */}
       {isDrawerVisible && (
         <div
-          className='fixed inset-0 z-[200] lg:hidden'
+          className='fixed inset-0 z-[200] md:hidden'
           aria-modal='true'
           role='dialog'
           aria-label='Menu de navegação'

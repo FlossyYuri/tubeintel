@@ -73,7 +73,7 @@ export function VideoCard({ video, listView = false, onOpen, outperformanceRatio
       <div className={cn("p-3 sm:p-3.5", listView && "flex-1 min-w-0")}>
         <div className="flex gap-1 flex-wrap mb-2">
           {outperformanceRatio != null && outperformanceRatio >= 1.5 && (
-            <span className={cn(badge, "bg-[rgba(0,217,126,0.15)] text-[var(--green)] border border-[rgba(0,217,126,0.3)]")}>
+            <span className={cn(badge, "bg-[rgba(61,191,127,0.15)] text-[var(--green)] border border-[rgba(61,191,127,0.3)]")}>
               {outperformanceRatio.toFixed(1)}x média
             </span>
           )}

@@ -1,25 +1,26 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
 @import 'tailwindcss';
 
 :root {
-  --bg: #080c14;
-  --bg2: #0d1220;
-  --bg3: #111827;
-  --card: #131d2e;
-  --card2: #1a2640;
-  --border: #1e2d45;
-  --border2: #243350;
-  --accent: #ff3d3d;
-  --accent2: #ff6b35;
-  --blue: #3d8bff;
+  --bg: #07070c;
+  --bg2: #0a0a0f;
+  --bg3: #111118;
+  --card: rgba(255, 255, 255, 0.02);
+  --card2: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.06);
+  --border2: rgba(255, 255, 255, 0.1);
+  --accent: #E8441C;
+  --accent2: #FF6B3D;
+  --blue: #4A9EE8;
   --blue2: #5ba3ff;
-  --green: #00d97e;
-  --yellow: #ffd60a;
-  --purple: #b06dff;
-  --text: #e8edf5;
-  --text2: #8fa3bf;
-  --text3: #4a6380;
-  --glow: 0 0 30px rgba(255, 61, 61, 0.15);
+  --green: #3DBF7F;
+  --yellow: #FFD60A;
+  --purple: #9B6EE8;
+  --text: #F0EEE8;
+  --text2: #8A8880;
+  --text3: #4A4845;
+  --text4: #3E3C38;
+  --glow: 0 0 30px rgba(232, 68, 28, 0.15);
 
   /* Tipografia */
   --text-xs: 0.6875rem;
@@ -58,7 +59,7 @@
   --color-text2: var(--text2);
   --color-text3: var(--text3);
   --font-sans: 'Inter', sans-serif;
-  --font-mono: 'Space Mono', monospace;
+  --font-mono: 'DM Mono', monospace;
   --font-display: 'Syne', sans-serif;
 }
 
@@ -113,6 +114,6 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border2);
+  background: var(--border);
   border-radius: 3px;
 }
