@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { VideoGrid } from "@/components/video/VideoGrid";
 import { VideoModal } from "@/components/video/VideoModal";
 import { PageHeader, Spinner, EmptyState, ErrorMessage, FilterSelect } from "@/components/ui";
@@ -8,11 +8,14 @@ import { input, buttonPrimary } from "@/lib/design-tokens";
 import { SELECT_REGIONS } from "@/lib/regions";
 import { mergeSearchWithVideos } from "@/lib/transform";
 import { isShort } from "@/lib/format";
+import { useUrlState } from "@/hooks/useUrlState";
+import { SHORTS_SCHEMA, SHORTS_DEFAULTS } from "@/lib/url-params";
 import type { VideoWithStats } from "@/types/youtube";
 
-export default function ShortsPage() {
-  const [query, setQuery] = useState("");
-  const [region, setRegion] = useState("US");
+function ShortsPageContent() {
+  const [urlState, updateParams] = useUrlState(SHORTS_SCHEMA, SHORTS_DEFAULTS);
+  const { q: query, region } = urlState;
+  const [draftQuery, setDraftQuery] = useState(query);
   const [videos, setVideos] = useState<VideoWithStats[]>([]);
   const [nextPageToken, setNextPageToken] = useState<string | undefined>();
   const [loadingMore, setLoadingMore] = useState(false);
@@ -20,10 +23,14 @@ export default function ShortsPage() {
   const [error, setError] = useState("");
   const [selectedVideo, setSelectedVideo] = useState<VideoWithStats | null>(null);
 
+  useEffect(() => {
+    setDraftQuery(query);
+  }, [query]);
+
   const searchQuery = query.trim() ? `${query.trim()} #shorts` : "#shorts";
   const publishedAfter = new Date(Date.now() - 14 * 86400000).toISOString();
 
-  const doSearch = async (pageToken?: string, append = false) => {
+  const doSearch = useCallback(async (pageToken?: string, append = false) => {
     if (!append) {
       setError("");
       setLoading(true);
@@ -58,9 +65,22 @@ export default function ShortsPage() {
       setLoading(false);
       setLoadingMore(false);
     }
-  };
+  }, [searchQuery, region]);
 
-  const handleSearch = () => doSearch();
+  useEffect(() => {
+    if (query || region !== "US") {
+      doSearch();
+    }
+  }, [query, region, doSearch]);
+
+  const handleSearch = () => {
+    const trimmed = draftQuery.trim();
+    if (!trimmed && region === "US") {
+      doSearch();
+    } else {
+      updateParams({ q: trimmed });
+    }
+  };
   const loadMore = () => nextPageToken && doSearch(nextPageToken, true);
 
   return (
@@ -79,8 +99,8 @@ export default function ShortsPage() {
             <input
               id="shorts-query"
               type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              value={draftQuery}
+              onChange={(e) => setDraftQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               placeholder="Tema dos shorts que queres encontrar..."
               className={input}
@@ -89,7 +109,7 @@ export default function ShortsPage() {
           <FilterSelect
             label="Região"
             value={region}
-            onChange={setRegion}
+            onChange={(v) => updateParams({ region: v })}
             options={SELECT_REGIONS}
           />
           <button
@@ -132,5 +152,20 @@ export default function ShortsPage() {
         <VideoModal video={selectedVideo} onClose={() => setSelectedVideo(null)} />
       )}
     </div>
+  );
+}
+
+export default function ShortsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center py-16 text-[var(--text3)]">
+          <Spinner className="mb-4" />
+          <p className="font-mono text-sm">A carregar...</p>
+        </div>
+      }
+    >
+      <ShortsPageContent />
+    </Suspense>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useCallback, useEffect, useMemo, Suspense } from 'react';
 import { SearchBar } from '@/components/search/SearchBar';
 import {
   FilterPanel,
@@ -16,19 +15,27 @@ import { mergeSearchWithVideos } from '@/lib/transform';
 import { isShort, getDurationSeconds, formatNumber } from '@/lib/format';
 import { calcEngagementRate } from '@/lib/viral-score';
 import { sortVideos, type VideoSortKey } from '@/lib/sort-videos';
+import { useUrlState } from '@/hooks/useUrlState';
+import {
+  SEARCH_SCHEMA,
+  SEARCH_DEFAULTS,
+  type SearchUrlState,
+} from '@/lib/url-params';
 import { SearchX } from 'lucide-react';
 import type { VideoWithStats } from '@/types/youtube';
 
-const defaultFilters: SearchFilters = {
-  order: 'date',
-  regionCode: 'US',
-  videoDuration: '',
-  videoFormat: '',
-  videoCategoryId: '',
-  videoDefinition: '',
-  videoCaption: '',
-  publishedAfter: 'week',
-};
+function urlStateToFilters(state: SearchUrlState): SearchFilters {
+  return {
+    order: state.order,
+    regionCode: state.region,
+    videoDuration: state.duration,
+    videoFormat: state.format,
+    videoCategoryId: state.category,
+    videoDefinition: state.definition,
+    videoCaption: state.caption,
+    publishedAfter: state.publishedAfter,
+  };
+}
 
 function getPublishedAfter(dateFilter: string): string {
   if (!dateFilter) return '';
@@ -73,18 +80,21 @@ function StatPill({
 
 /* ─── Page content ──────────────────────────────────────── */
 function SearchPageContent() {
-  const [filters, setFilters] = useState<SearchFilters>(defaultFilters);
+  const [urlState, updateParams] = useUrlState(SEARCH_SCHEMA, SEARCH_DEFAULTS);
+  const filters = useMemo(
+    () => urlStateToFilters(urlState),
+    [urlState],
+  );
   const [videos, setVideos] = useState<VideoWithStats[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [query, setQuery] = useState('');
   const [nextPageToken, setNextPageToken] = useState<string | undefined>();
   const [loadingMore, setLoadingMore] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<VideoWithStats | null>(
     null,
   );
-  const [sortBy, setSortBy] = useState<VideoSortKey>('recent');
-  const searchParams = useSearchParams();
+  const query = urlState.q;
+  const sortBy = urlState.sortBy as VideoSortKey;
 
   const doSearch = useCallback(
     async (
@@ -141,7 +151,6 @@ function SearchPageContent() {
         else setVideos(merged);
 
         setNextPageToken(data.search.nextPageToken);
-        setQuery(searchQuery);
 
         if (!append) {
           await fetch('/api/search-history', {
@@ -165,37 +174,42 @@ function SearchPageContent() {
     [filters],
   );
 
-  // Refetch when filters change; also handles initial load from ?q= URL
+  // Refetch when URL state (filters, q) changes
   useEffect(() => {
-    const q = searchParams.get('q')?.trim() || query;
-    if (!q?.trim()) return;
-    doSearch(q.trim());
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- query intentionally omitted to avoid refetch loop
-  }, [filters, searchParams, doSearch]);
+    const q = query?.trim();
+    if (!q) return;
+    doSearch(q);
+  }, [query, filters, doSearch]);
+
+  const handleSearchSubmit = useCallback(
+    (searchQuery: string) => {
+      if (!searchQuery.trim()) return;
+      updateParams({ q: searchQuery.trim() });
+    },
+    [updateParams],
+  );
 
   const handleFiltersChange = (newFilters: SearchFilters) => {
-    setFilters(newFilters);
-    if (newFilters.order !== filters.order) {
-      const orderToSort: Record<string, VideoSortKey> = {
-        viewCount: 'views',
-        date: 'recent',
-      };
-      const s = orderToSort[newFilters.order];
-      if (s) setSortBy(s);
-    }
+    updateParams({
+      order: newFilters.order,
+      region: newFilters.regionCode,
+      duration: newFilters.videoDuration,
+      format: newFilters.videoFormat,
+      category: newFilters.videoCategoryId,
+      definition: newFilters.videoDefinition,
+      caption: newFilters.videoCaption,
+      publishedAfter: newFilters.publishedAfter,
+    });
   };
 
   const handleSortChange = (newSort: VideoSortKey) => {
-    setSortBy(newSort);
-    const q = searchParams.get('q')?.trim() || query;
-    if (!q?.trim()) return;
+    if (!query?.trim()) return;
     if (newSort === 'views') {
-      setFilters((f) => ({ ...f, order: 'viewCount' }));
+      updateParams({ sortBy: 'views', order: 'viewCount' });
     } else if (newSort === 'recent') {
-      setFilters((f) => ({ ...f, order: 'date' }));
+      updateParams({ sortBy: 'recent', order: 'date' });
     } else {
-      // viral, likes, engagement: refetch with viewCount, then sort client-side
-      doSearch(q, undefined, false, { order: 'viewCount' });
+      updateParams({ sortBy: newSort, order: 'viewCount' });
     }
   };
 
@@ -251,13 +265,18 @@ function SearchPageContent() {
         </div>
 
         <div className='flex flex-wrap gap-2.5'>
-          <SearchBar onSearch={doSearch} loading={loading} />
+          <SearchBar
+            key={query}
+            onSearch={handleSearchSubmit}
+            loading={loading}
+            defaultValue={query}
+          />
           <FilterPanel filters={filters} onChange={handleFiltersChange} />
         </div>
 
         <DateFilter
           value={filters.publishedAfter}
-          onChange={(v) => setFilters((f) => ({ ...f, publishedAfter: v }))}
+          onChange={(v) => updateParams({ publishedAfter: v })}
         />
       </div>
 

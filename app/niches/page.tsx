@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { NICHES, NICHE_CATEGORIES } from "@/lib/niches";
 import type { Niche } from "@/lib/niches";
 import { PageHeader } from "@/components/ui";
 import { card } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
+import { useUrlState } from "@/hooks/useUrlState";
+import { NICHES_SCHEMA, NICHES_DEFAULTS } from "@/lib/url-params";
 
-export default function NichesPage() {
+function NichesPageContent() {
   const [selected, setSelected] = useState<string | null>(null);
-  const [categoryFilter, setCategoryFilter] = useState<string>("Todos");
+  const [urlState, updateParams] = useUrlState(NICHES_SCHEMA, NICHES_DEFAULTS);
+  const categoryFilter = urlState.category;
   const router = useRouter();
 
   const filteredNiches = useMemo(() => {
@@ -47,7 +50,7 @@ export default function NichesPage() {
         <span className="text-sm font-medium text-[var(--text2)]">Categoria:</span>
         <select
           value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
+          onChange={(e) => updateParams({ category: e.target.value })}
           className={cn(
             "rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-medium",
             "text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
@@ -98,6 +101,20 @@ export default function NichesPage() {
         Clica num nicho para pesquisar vídeos virais nessa área.
       </p>
     </div>
+  );
+}
+
+export default function NichesPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center py-16 text-[var(--text3)]">
+          <p className="font-mono text-sm">A carregar...</p>
+        </div>
+      }
+    >
+      <NichesPageContent />
+    </Suspense>
   );
 }
 

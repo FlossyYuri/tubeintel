@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { VideoGrid } from "@/components/video/VideoGrid";
 import { VideoModal } from "@/components/video/VideoModal";
@@ -12,6 +12,8 @@ import { YOUTUBE_CATEGORY_OPTIONS } from "@/lib/categories";
 import { TRENDING_SELECT_REGIONS } from "@/lib/regions";
 import { calcViralScore } from "@/lib/viral-score";
 import { isShort, getDurationSeconds } from "@/lib/format";
+import { useUrlState } from "@/hooks/useUrlState";
+import { RANKINGS_SCHEMA, RANKINGS_DEFAULTS } from "@/lib/url-params";
 import type { VideoWithStats } from "@/types/youtube";
 import type { YouTubeVideoItem } from "@/types/youtube";
 
@@ -48,13 +50,10 @@ function transformVideo(v: YouTubeVideoItem): VideoWithStats {
 
 type Tab = "videos" | "channels";
 
-export default function RankingsPage() {
-  const [tab, setTab] = useState<Tab>("videos");
-  const [region, setRegion] = useState("US");
-  const [category, setCategory] = useState("");
-  const [keyword, setKeyword] = useState("viral");
-  const [searchKeyword, setSearchKeyword] = useState("viral");
-  const [formatFilter, setFormatFilter] = useState<"all" | "shorts" | "longform">("all");
+function RankingsPageContent() {
+  const [urlState, updateParams] = useUrlState(RANKINGS_SCHEMA, RANKINGS_DEFAULTS);
+  const { tab, region, category, keyword: searchKeyword, format: formatFilter } = urlState;
+  const [keyword, setKeyword] = useState(searchKeyword);
   const [videos, setVideos] = useState<VideoWithStats[]>([]);
   const [videosNextToken, setVideosNextToken] = useState<string | undefined>();
   const [videosLoadingMore, setVideosLoadingMore] = useState(false);
@@ -74,6 +73,10 @@ export default function RankingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedVideo, setSelectedVideo] = useState<VideoWithStats | null>(null);
+
+  useEffect(() => {
+    setKeyword(searchKeyword);
+  }, [searchKeyword]);
 
   useEffect(() => {
     if (tab === "videos") {
@@ -173,7 +176,7 @@ export default function RankingsPage() {
 
       <div className="flex gap-1 mb-6 p-1.5 bg-[var(--card)] rounded-xl border border-[var(--border)] w-fit">
         <button
-          onClick={() => setTab("videos")}
+          onClick={() => updateParams({ tab: "videos" })}
           className={cn(
             "px-4 py-2 text-sm rounded-lg transition-all font-semibold",
             tab === "videos"
@@ -185,7 +188,7 @@ export default function RankingsPage() {
           Top Vídeos
         </button>
         <button
-          onClick={() => setTab("channels")}
+          onClick={() => updateParams({ tab: "channels" })}
           className={cn(
             "px-4 py-2 text-sm rounded-lg transition-all font-semibold",
             tab === "channels"
@@ -205,13 +208,13 @@ export default function RankingsPage() {
               <FilterSelect
                 label="Região"
                 value={region}
-                onChange={setRegion}
+                onChange={(v) => updateParams({ region: v })}
                 options={TRENDING_SELECT_REGIONS}
               />
               <FilterSelect
                 label="Categoria"
                 value={category}
-                onChange={setCategory}
+                onChange={(v) => updateParams({ category: v })}
                 options={YOUTUBE_CATEGORY_OPTIONS}
               />
               <div className="flex flex-col gap-1.5">
@@ -222,7 +225,7 @@ export default function RankingsPage() {
                   {(["all", "shorts", "longform"] as const).map((f) => (
                     <button
                       key={f}
-                      onClick={() => setFormatFilter(f)}
+                      onClick={() => updateParams({ format: f })}
                       className={cn(
                         "px-3 py-1.5 text-xs font-mono rounded transition-colors",
                         formatFilter === f
@@ -247,13 +250,13 @@ export default function RankingsPage() {
                   type="text"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && setSearchKeyword(keyword)}
+                  onKeyDown={(e) => e.key === "Enter" && updateParams({ keyword: keyword.trim() || "viral" })}
                   placeholder="Nicho ou keyword..."
                   className={input}
                 />
               </div>
               <button
-                onClick={() => setSearchKeyword(keyword)}
+                onClick={() => updateParams({ keyword: keyword.trim() || "viral" })}
                 className="px-4 py-2 bg-[var(--accent)] text-white text-sm font-bold rounded-xl hover:bg-[#ff5555] transition-all"
               >
                 Buscar
@@ -261,7 +264,7 @@ export default function RankingsPage() {
               <FilterSelect
                 label="Região"
                 value={region}
-                onChange={setRegion}
+                onChange={(v) => updateParams({ region: v })}
                 options={TRENDING_SELECT_REGIONS}
               />
             </>
@@ -367,5 +370,20 @@ export default function RankingsPage() {
         <VideoModal video={selectedVideo} onClose={() => setSelectedVideo(null)} />
       )}
     </div>
+  );
+}
+
+export default function RankingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center py-16 text-[var(--text3)]">
+          <Spinner className="mb-4" />
+          <p className="font-mono text-sm">A carregar...</p>
+        </div>
+      }
+    >
+      <RankingsPageContent />
+    </Suspense>
   );
 }

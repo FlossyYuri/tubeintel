@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useCallback, useEffect, useMemo, Suspense } from 'react';
 import { SearchBar } from '@/components/search/SearchBar';
 import {
   ChannelFilterPanel,
@@ -14,13 +13,21 @@ import { Spinner, ErrorMessage } from '@/components/ui';
 import { mergeSearchWithChannels } from '@/lib/transform';
 import { sortChannels, type ChannelSortKey } from '@/lib/sort-channels';
 import { formatNumber } from '@/lib/format';
+import { useUrlState } from '@/hooks/useUrlState';
+import {
+  CHANNELS_SCHEMA,
+  CHANNELS_DEFAULTS,
+  type ChannelsUrlState,
+} from '@/lib/url-params';
 import { Tv } from 'lucide-react';
 import type { ChannelWithStats } from '@/types/youtube';
 
-const defaultFilters: ChannelSearchFilters = {
-  order: 'relevance',
-  regionCode: 'US',
-};
+function urlStateToFilters(state: ChannelsUrlState): ChannelSearchFilters {
+  return {
+    order: state.order,
+    regionCode: state.region,
+  };
+}
 
 /* ─── Stat pill ─────────────────────────────────────────── */
 function StatPill({
@@ -52,16 +59,19 @@ function StatPill({
 
 /* ─── Page content ──────────────────────────────────────── */
 function ChannelsPageContent() {
-  const [filters, setFilters] = useState<ChannelSearchFilters>(defaultFilters);
+  const [urlState, updateParams] = useUrlState(CHANNELS_SCHEMA, CHANNELS_DEFAULTS);
+  const filters = useMemo(
+    () => urlStateToFilters(urlState),
+    [urlState],
+  );
   const [channels, setChannels] = useState<ChannelWithStats[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [query, setQuery] = useState('');
   const [nextPageToken, setNextPageToken] = useState<string | undefined>();
   const [loadingMore, setLoadingMore] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState<ChannelWithStats | null>(null);
-  const [sortBy, setSortBy] = useState<ChannelSortKey>('subscribers');
-  const searchParams = useSearchParams();
+  const query = urlState.q;
+  const sortBy = urlState.sortBy as ChannelSortKey;
 
   const doSearch = useCallback(
     async (
@@ -98,7 +108,6 @@ function ChannelsPageContent() {
         else setChannels(merged);
 
         setNextPageToken(data.search.nextPageToken);
-        setQuery(searchQuery);
 
         if (!append) {
           await fetch('/api/search-history', {
@@ -123,11 +132,29 @@ function ChannelsPageContent() {
   );
 
   useEffect(() => {
-    const q = searchParams.get('q')?.trim() || query;
-    if (!q?.trim()) return;
-    doSearch(q.trim());
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- query intentionally omitted
-  }, [filters, searchParams, doSearch]);
+    const q = query?.trim();
+    if (!q) return;
+    doSearch(q);
+  }, [query, filters, doSearch]);
+
+  const handleSearchSubmit = useCallback(
+    (searchQuery: string) => {
+      if (!searchQuery.trim()) return;
+      updateParams({ q: searchQuery.trim() });
+    },
+    [updateParams],
+  );
+
+  const handleFiltersChange = (newFilters: ChannelSearchFilters) => {
+    updateParams({
+      order: newFilters.order,
+      region: newFilters.regionCode,
+    });
+  };
+
+  const handleSortChange = (newSort: ChannelSortKey) => {
+    updateParams({ sortBy: newSort });
+  };
 
   const handleLoadMore = () => {
     if (nextPageToken && query) doSearch(query, nextPageToken, true);
@@ -188,12 +215,13 @@ function ChannelsPageContent() {
 
         <div className='flex flex-wrap gap-2.5'>
           <SearchBar
-            onSearch={doSearch}
+            key={query}
+            onSearch={handleSearchSubmit}
             loading={loading}
             placeholder='Ex: receitas, gaming, tech, fitness...'
-            defaultValue={searchParams.get('q') || ''}
+            defaultValue={query}
           />
-          <ChannelFilterPanel filters={filters} onChange={setFilters} />
+          <ChannelFilterPanel filters={filters} onChange={handleFiltersChange} />
         </div>
       </div>
 
@@ -257,7 +285,7 @@ function ChannelsPageContent() {
                 {channels.length} canais encontrados
               </p>
             </div>
-            <ChannelSortControls value={sortBy} onChange={setSortBy} />
+            <ChannelSortControls value={sortBy} onChange={handleSortChange} />
           </div>
 
           {/* Stats bar */}

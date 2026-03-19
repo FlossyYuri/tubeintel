@@ -1,17 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { Bell } from "lucide-react";
 import { RisingBadge } from "@/components/channel/RisingBadge";
 import { PageHeader, Spinner, EmptyState, ErrorMessage, FilterSelect } from "@/components/ui";
 import { input, buttonPrimary } from "@/lib/design-tokens";
 import { SELECT_REGIONS } from "@/lib/regions";
+import { useUrlState } from "@/hooks/useUrlState";
+import { RISING_SCHEMA, RISING_DEFAULTS } from "@/lib/url-params";
 
-export default function RisingPage() {
-  const [keyword, setKeyword] = useState("viral");
-  const [searchKeyword, setSearchKeyword] = useState("viral");
-  const [region, setRegion] = useState("US");
+function RisingPageContent() {
+  const [urlState, updateParams] = useUrlState(RISING_SCHEMA, RISING_DEFAULTS);
+  const { keyword: searchKeyword, region } = urlState;
+  const [keyword, setKeyword] = useState(searchKeyword);
   const [channels, setChannels] = useState<Array<{
     channelId: string;
     name: string;
@@ -29,6 +31,10 @@ export default function RisingPage() {
   const [error, setError] = useState("");
   const [alertingId, setAlertingId] = useState<string | null>(null);
   const [alertDoneIds, setAlertDoneIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    setKeyword(searchKeyword);
+  }, [searchKeyword]);
 
   useEffect(() => {
     setLoading(true);
@@ -101,13 +107,13 @@ export default function RisingPage() {
               type="text"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && setSearchKeyword(keyword)}
+              onKeyDown={(e) => e.key === "Enter" && updateParams({ keyword: keyword.trim() || "viral" })}
               placeholder="Nicho ou keyword..."
               className={input}
             />
           </div>
           <button
-            onClick={() => setSearchKeyword(keyword)}
+            onClick={() => updateParams({ keyword: keyword.trim() || "viral" })}
             className={buttonPrimary}
           >
             Buscar
@@ -115,7 +121,7 @@ export default function RisingPage() {
           <FilterSelect
             label="Região"
             value={region}
-            onChange={setRegion}
+            onChange={(v) => updateParams({ region: v })}
             options={SELECT_REGIONS}
           />
         </div>
@@ -182,5 +188,20 @@ export default function RisingPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function RisingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center py-16 text-[var(--text3)]">
+          <Spinner className="mb-4" />
+          <p className="font-mono text-sm">A carregar...</p>
+        </div>
+      }
+    >
+      <RisingPageContent />
+    </Suspense>
   );
 }

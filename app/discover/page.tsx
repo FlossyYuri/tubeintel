@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { SearchBar } from "@/components/search/SearchBar";
 import { VideoGrid } from "@/components/video/VideoGrid";
 import { VideoModal } from "@/components/video/VideoModal";
@@ -10,6 +10,8 @@ import { sectionTitle } from "@/lib/design-tokens";
 import type { VideoSortKey } from "@/lib/sort-videos";
 import { YOUTUBE_CATEGORY_OPTIONS } from "@/lib/categories";
 import { SELECT_REGIONS } from "@/lib/regions";
+import { useUrlState } from "@/hooks/useUrlState";
+import { DISCOVER_SCHEMA, DISCOVER_DEFAULTS } from "@/lib/url-params";
 import type { VideoWithStats } from "@/types/youtube";
 import type { VideoWithOutperformance } from "@/app/api/youtube/outperformers/route";
 
@@ -35,20 +37,15 @@ const SORT_TO_API_ORDER: Record<VideoSortKey, string> = {
   engagement: "engagement",
 };
 
-export default function DiscoverPage() {
-  const [keyword, setKeyword] = useState("viral");
-  const [searchKeyword, setSearchKeyword] = useState("viral");
-  const [region, setRegion] = useState("US");
-  const [category, setCategory] = useState("");
-  const [period, setPeriod] = useState("week");
-  const [minMultiplier, setMinMultiplier] = useState("2");
+function DiscoverPageContent() {
+  const [urlState, updateParams] = useUrlState(DISCOVER_SCHEMA, DISCOVER_DEFAULTS);
+  const { keyword: searchKeyword, region, category, period, multiplier: minMultiplier, sortBy } = urlState;
   const [videos, setVideos] = useState<VideoWithOutperformance[]>([]);
   const [nextPageToken, setNextPageToken] = useState<string | undefined>();
   const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedVideo, setSelectedVideo] = useState<VideoWithStats | null>(null);
-  const [sortBy, setSortBy] = useState<VideoSortKey>("ratio");
 
   useEffect(() => {
     setLoading(true);
@@ -60,7 +57,7 @@ export default function DiscoverPage() {
       publishedAfter: period,
       minMultiplier,
       maxResults: "24",
-      order: SORT_TO_API_ORDER[sortBy] || "ratio",
+      order: SORT_TO_API_ORDER[sortBy as VideoSortKey] || "ratio",
     });
     if (category) params.set("videoCategoryId", category);
 
@@ -89,7 +86,7 @@ export default function DiscoverPage() {
         minMultiplier,
         maxResults: "24",
         pageToken: nextPageToken,
-        order: SORT_TO_API_ORDER[sortBy] || "ratio",
+        order: SORT_TO_API_ORDER[sortBy as VideoSortKey] || "ratio",
       });
       if (category) params.set("videoCategoryId", category);
       const res = await fetch(`/api/youtube/outperformers?${params}`);
@@ -104,9 +101,12 @@ export default function DiscoverPage() {
     }
   };
 
-  const handleSearch = (q: string) => {
-    setSearchKeyword(q.trim() || "viral");
-  };
+  const handleSearch = useCallback(
+    (q: string) => {
+      updateParams({ keyword: q.trim() || "viral" });
+    },
+    [updateParams]
+  );
 
   return (
     <div>
@@ -119,34 +119,36 @@ export default function DiscoverPage() {
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap gap-2.5">
             <SearchBar
+              key={searchKeyword}
               onSearch={handleSearch}
               loading={loading}
               placeholder="Nicho ou keyword (ex: viral, receitas...)"
+              defaultValue={searchKeyword}
             />
           </div>
           <div className="flex flex-wrap gap-2.5 items-end">
             <FilterSelect
               label="Região"
               value={region}
-              onChange={setRegion}
+              onChange={(v) => updateParams({ region: v })}
               options={SELECT_REGIONS}
             />
             <FilterSelect
               label="Categoria"
               value={category}
-              onChange={setCategory}
+              onChange={(v) => updateParams({ category: v })}
               options={YOUTUBE_CATEGORY_OPTIONS}
             />
             <FilterSelect
               label="Período"
               value={period}
-              onChange={setPeriod}
+              onChange={(v) => updateParams({ period: v })}
               options={PERIODS}
             />
             <FilterSelect
               label="Mín. multiplicador"
               value={minMultiplier}
-              onChange={setMinMultiplier}
+              onChange={(v) => updateParams({ multiplier: v })}
               options={MULTIPLIERS.map((m) => ({
                 value: m.value,
                 label: `${m.label} média`,
@@ -183,8 +185,8 @@ export default function DiscoverPage() {
               </p>
             </div>
             <SortControls
-              value={sortBy}
-              onChange={setSortBy}
+              value={sortBy as VideoSortKey}
+              onChange={(v) => updateParams({ sortBy: v })}
               options={["ratio", "views", "recent", "viral", "likes", "engagement"]}
             />
           </div>
@@ -214,5 +216,20 @@ export default function DiscoverPage() {
         <VideoModal video={selectedVideo} onClose={() => setSelectedVideo(null)} />
       )}
     </div>
+  );
+}
+
+export default function DiscoverPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center py-16 text-[var(--text3)]">
+          <Spinner className="mb-4" />
+          <p className="font-mono text-sm">A carregar...</p>
+        </div>
+      }
+    >
+      <DiscoverPageContent />
+    </Suspense>
   );
 }

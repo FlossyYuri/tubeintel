@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import { VideoGrid } from "@/components/video/VideoGrid";
 import { VideoModal } from "@/components/video/VideoModal";
 import { SortControls } from "@/components/video/SortControls";
@@ -12,6 +12,8 @@ import { TRENDING_REGIONS } from "@/lib/regions";
 import { calcViralScore } from "@/lib/viral-score";
 import { parseDuration, isShort, getDurationSeconds } from "@/lib/format";
 import { sortVideos, type VideoSortKey } from "@/lib/sort-videos";
+import { useUrlState } from "@/hooks/useUrlState";
+import { TRENDING_SCHEMA, TRENDING_DEFAULTS } from "@/lib/url-params";
 import type { VideoWithStats } from "@/types/youtube";
 import type { YouTubeVideoItem } from "@/types/youtube";
 
@@ -46,17 +48,15 @@ function transformVideo(v: YouTubeVideoItem): VideoWithStats {
   };
 }
 
-export default function TrendingPage() {
-  const [country, setCountry] = useState("US");
-  const [category, setCategory] = useState("0");
+function TrendingPageContent() {
+  const [urlState, updateParams] = useUrlState(TRENDING_SCHEMA, TRENDING_DEFAULTS);
+  const { region: country, category, format: formatFilter, sortBy } = urlState;
   const [videos, setVideos] = useState<VideoWithStats[]>([]);
   const [nextPageToken, setNextPageToken] = useState<string | undefined>();
   const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedVideo, setSelectedVideo] = useState<VideoWithStats | null>(null);
-  const [formatFilter, setFormatFilter] = useState<"all" | "shorts" | "longform">("all");
-  const [sortBy, setSortBy] = useState<VideoSortKey>("views");
 
   useEffect(() => {
     setLoading(true);
@@ -106,7 +106,7 @@ export default function TrendingPage() {
         : videos;
 
   const sortedVideos = useMemo(
-    () => sortVideos(filteredVideos, sortBy),
+    () => sortVideos(filteredVideos, sortBy as VideoSortKey),
     [filteredVideos, sortBy]
   );
 
@@ -124,7 +124,7 @@ export default function TrendingPage() {
         {TRENDING_REGIONS.map((c) => (
           <button
             key={c.value}
-            onClick={() => setCountry(c.value)}
+            onClick={() => updateParams({ region: c.value })}
             className={`p-3 rounded-xl text-center transition-all border ${
               country === c.value
                 ? "bg-[rgba(255,61,61,0.1)] border-[var(--accent)]"
@@ -146,7 +146,7 @@ export default function TrendingPage() {
         {YOUTUBE_CATEGORY_BUTTONS.map((c) => (
           <button
             key={c.id}
-            onClick={() => setCategory(c.id)}
+            onClick={() => updateParams({ category: c.id })}
             className={`px-4 py-2 text-sm rounded-lg transition-all font-semibold ${
               category === c.id
                 ? "bg-[var(--card2)] text-[var(--text)] shadow-sm"
@@ -168,7 +168,7 @@ export default function TrendingPage() {
           {(["all", "shorts", "longform"] as const).map((f) => (
             <button
               key={f}
-              onClick={() => setFormatFilter(f)}
+              onClick={() => updateParams({ format: f })}
               className={`px-3 py-1.5 text-xs font-mono rounded transition-colors ${
                 formatFilter === f
                   ? "bg-[var(--card2)] text-[var(--text)]"
@@ -181,7 +181,7 @@ export default function TrendingPage() {
           </div>
         </div>
         {!loading && filteredVideos.length > 0 && (
-          <SortControls value={sortBy} onChange={setSortBy} />
+          <SortControls value={sortBy as VideoSortKey} onChange={(v) => updateParams({ sortBy: v })} />
         )}
       </div>
 
@@ -226,5 +226,20 @@ export default function TrendingPage() {
         <VideoModal video={selectedVideo} onClose={() => setSelectedVideo(null)} />
       )}
     </div>
+  );
+}
+
+export default function TrendingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center py-16 text-[var(--text3)]">
+          <Spinner className="mb-4" />
+          <p className="font-mono text-sm">A carregar...</p>
+        </div>
+      }
+    >
+      <TrendingPageContent />
+    </Suspense>
   );
 }

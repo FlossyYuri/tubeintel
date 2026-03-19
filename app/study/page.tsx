@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { StudyVideoGrid } from "@/components/video/StudyVideoGrid";
 import { VideoModal } from "@/components/video/VideoModal";
 import { PageHeader, Spinner, EmptyState, ErrorMessage } from "@/components/ui";
@@ -9,6 +9,8 @@ import { TRENDING_REGIONS } from "@/lib/regions";
 import { mergeSearchWithVideos } from "@/lib/transform";
 import { calcViralScore } from "@/lib/viral-score";
 import { isShort, getDurationSeconds } from "@/lib/format";
+import { useUrlState } from "@/hooks/useUrlState";
+import { STUDY_SCHEMA, STUDY_DEFAULTS } from "@/lib/url-params";
 import type { VideoWithStats } from "@/types/youtube";
 import type { YouTubeVideoItem } from "@/types/youtube";
 import type { StudyMode, StudyFormat } from "@/components/video/StudyVideoCard";
@@ -50,10 +52,10 @@ function transformVideo(v: YouTubeVideoItem): VideoWithStats {
   };
 }
 
-export default function StudyPage() {
-  const [region, setRegion] = useState("US");
-  const [category, setCategory] = useState("0");
-  const [studyModeIndex, setStudyModeIndex] = useState(0);
+function StudyPageContent() {
+  const [urlState, updateParams] = useUrlState(STUDY_SCHEMA, STUDY_DEFAULTS);
+  const { region, category, mode: modeParam } = urlState;
+  const studyModeIndex = Math.min(2, Math.max(0, parseInt(modeParam || "0", 10) || 0));
   const [videos, setVideos] = useState<VideoWithStats[]>([]);
   const [nextPageToken, setNextPageToken] = useState<string | undefined>();
   const [loadingMore, setLoadingMore] = useState(false);
@@ -171,7 +173,7 @@ export default function StudyPage() {
             {STUDY_MODES.map((opt, i) => (
               <button
                 key={`${opt.value}-${opt.format}`}
-                onClick={() => setStudyModeIndex(i)}
+                onClick={() => updateParams({ mode: String(i) })}
                 className={`rounded-xl border px-4 py-2.5 text-[13px] font-semibold transition-all ${
                   studyModeIndex === i
                     ? "border-[rgba(232,68,28,0.4)] bg-[rgba(232,68,28,0.12)] text-[#F0EEE8]"
@@ -196,7 +198,7 @@ export default function StudyPage() {
             {TRENDING_REGIONS.map((c) => (
               <button
                 key={c.value}
-                onClick={() => setRegion(c.value)}
+                onClick={() => updateParams({ region: c.value })}
                 className={`rounded-xl border p-3 text-center transition-all ${
                   region === c.value
                     ? "border-[rgba(232,68,28,0.4)] bg-[rgba(232,68,28,0.08)]"
@@ -227,7 +229,7 @@ export default function StudyPage() {
             {YOUTUBE_CATEGORY_BUTTONS.map((c) => (
               <button
                 key={c.id}
-                onClick={() => setCategory(c.id)}
+                onClick={() => updateParams({ category: c.id })}
                 className={`rounded-lg px-3 py-2 text-[12px] font-semibold transition-all ${
                   category === c.id
                     ? "bg-white/[0.08] text-[#F0EEE8]"
@@ -300,5 +302,25 @@ export default function StudyPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function StudyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center gap-3 py-20">
+          <Spinner />
+          <p
+            className="text-[11px] text-[#4A4845]"
+            style={{ fontFamily: "'DM Mono', monospace" }}
+          >
+            A carregar...
+          </p>
+        </div>
+      }
+    >
+      <StudyPageContent />
+    </Suspense>
   );
 }
