@@ -49,9 +49,26 @@ Abre a aplicação em `http://localhost:3000` e configura a tua YouTube API Key 
 4. Cria credenciais → Chave de API
 5. Cola a chave nas Configurações da aplicação
 
-## Deploy
+## Deploy com Docker
 
-Para produção, usa PostgreSQL em vez de SQLite:
+A aplicação expõe a porta **3005** por defeito:
+
+```bash
+# Configurar variáveis de ambiente
+cp .env.docker.example .env
+# Editar .env e preencher YOUTUBE_API_KEY, NEXTAUTH_SECRET, etc.
+
+# Build e iniciar
+docker compose up -d
+
+# Aceder em http://localhost:3005
+```
+
+O volume `app_data` persiste a base de dados SQLite entre reinícios.
+
+## Deploy (produção sem Docker)
+
+Para produção com PostgreSQL em vez de SQLite:
 
 ```bash
 # .env

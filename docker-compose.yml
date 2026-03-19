@@ -1,0 +1,25 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tubeintel
+    restart: unless-stopped
+    ports:
+      - "3005:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3005
+      - DATABASE_URL=file:/app/data/prisma.db
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3005}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+      - CACHE_TTL_SEARCH=${CACHE_TTL_SEARCH:-300}
+      - CACHE_TTL_TRENDING=${CACHE_TTL_TRENDING:-3600}
+      - CACHE_TTL_CHANNEL=${CACHE_TTL_CHANNEL:-1800}
+      - CACHE_TTL_RISING=${CACHE_TTL_RISING:-1800}
+    volumes:
+      - app_data:/app/data
+
+volumes:
+  app_data:
